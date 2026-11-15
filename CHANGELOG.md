@@ -1,5 +1,13 @@
 # 更新记录 / Changelog
 
+## 1.0.7 — 移除「问题反馈」「使用指南」两个页签
+
+- 配置页导航收窄为**连接配置 / 模型目录 / 账号管理 / 用量与额度**四项；移除「问题反馈」与「使用指南」整块界面（含 `IssueFeedback` 面板与指南 9 条子项）。
+- 新增独立**日志查看**页签（导航第五项，图标 `logs`，词条 `navlogs` 中英各一条）：只保留「查看普通日志 / 收起日志」，复用既有只读接口，不再提供样本采集、导出与清空等写操作。
+- 删除已无入口的 4 份文档：`docs/cn|intl/使用与故障处理指南.md`、`docs/cn|intl/USER_GUIDE.en.md`，并移除 README 中对应链接与「问题反馈」段落。
+- `IssueFeedback` / `createFeedbackKit` 子系统代码保留（仍被 `test/feedback.test.js` 直接引用），仅摘除界面入口。
+- Remove the **Report an issue** and **Help** tabs; navigation is now Connection / Models / Accounts / Usage. A read-only diagnostic-log block (view only) replaces the feedback page log tools. Delete the four unreferenced guide documents and their README links.
+
 ## 1.0.6 — 模型启用/禁用
 
 - 侧栏“模型”表格新增**启用**勾选列：取消勾选后，该模型不再出现在 DSH 模型选择器，也不能用它给会话发送消息；已停在该模型上的会话需重新选择。

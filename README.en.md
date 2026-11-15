@@ -2,11 +2,11 @@
 
 [简体中文](README.md)
 
-**Unified 1.0.6 supports DSH >=0.2.1-rc.2 <0.3.0 (including 0.2.2-rc.1 / rc.2 / rc.3).**
+**Unified 1.0.7 supports DSH >=0.2.1-rc.2 <0.3.0 (including 0.2.2-rc.1 / rc.2 / rc.3).**
 
-[Download v1.0.6](https://raw.githubusercontent.com/1924225725-collab/dsh-DKN-codebuddy-cli/main/releases/dsh-dkn-codebuddy-cli-1.0.6.tgz) One package and one CodeBuddy sidebar page contain two separate official CLI providers. DSH retains conversation and business-tool control.
+[Download v1.0.7](https://raw.githubusercontent.com/1924225725-collab/dsh-DKN-codebuddy-cli/main/releases/dsh-dkn-codebuddy-cli-1.0.7.tgz) One package and one CodeBuddy sidebar page contain two separate official CLI providers. DSH retains conversation and business-tool control.
 
-Choose a region in settings, then Connection, Models, Accounts, Usage, Report an issue (including log tools) or Help. This changes the settings view only. Select the intended provider in each DSH conversation.
+Choose a region in settings, then Connection, Models, Accounts, Usage or Logs. This changes the settings view only. Select the intended provider in each DSH conversation.
 
 Before installation, record existing settings and disable both standalone plugins while no task is running. Retain old packages, sessions and official sign-in files. Do not enable old adapters alongside this package. See [migration instructions](docs/MIGRATION.en.md).
 
@@ -18,4 +18,3 @@ Default CLI mode preserves official sign-in storage; separate config directories
 
 237 automated checks and synthetic headless UI checks passed. No real official model call, actual DSH business tool or private-session replay was performed. Merging does not resolve unknown incidents, improve connectivity or grant model/credit permissions. This independent adapter provides no relay server, shared accounts or credit resale.
 
-Settings now includes **Report an issue**: provide reproduction steps and context screenshots, review the evidence and download a ZIP. Join QQ group **1095591284** and contact the group owner privately. Nothing is uploaded automatically. See the [reporting guide](docs/ISSUE_REPORT.en.md). User descriptions, automatic facts and evidence gaps are separated; the bundle does not guarantee a root cause.

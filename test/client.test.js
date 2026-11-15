@@ -11,7 +11,7 @@ test('one UI keeps regional drafts, actions, consent, log exports and diagnostic
   let snapshot={status:'ready',writable:true,revision:1,value:{cliPath:'',configDir:region+'-profile',model:'',effort:'',timeoutMs:180000}};const listeners=new Set()
   return [region,{getSnapshot:()=>snapshot,subscribe:f=>{listeners.add(f);return()=>listeners.delete(f)},async mutate(ops,revision){assert.equal(revision,snapshot.revision);snapshot={...snapshot,value:{...snapshot.value},revision:revision+1};for(const op of ops)snapshot.value[op.path[0]]=op.value;listeners.forEach(f=>f())}}]
  }))
- const statuses=Object.fromEntries(['cn','intl'].map(r=>[r,{pluginVersion:'1.0.6',timeoutMs:180000,activeCalls:0,cliCheck:{state:'available',version:'9.8.7'},setup:{state:'idle'},usage:{calls:r==='cn'?2:7,inputTokens:10,outputTokens:1},catalog:{state:'ready',fetchedAt:1,models:[{id:'same-model',name:r,multiplier:r==='cn'?.2:.7,efforts:[],supportsImages:true}]},accounts:{supported:true,selectedId:null,accounts:[]},logs:{entries:1,failures:0,samples:0,captureArmed:false}}]))
+ const statuses=Object.fromEntries(['cn','intl'].map(r=>[r,{pluginVersion:'1.0.7',timeoutMs:180000,activeCalls:0,cliCheck:{state:'available',version:'9.8.7'},setup:{state:'idle'},usage:{calls:r==='cn'?2:7,inputTokens:10,outputTokens:1},catalog:{state:'ready',fetchedAt:1,models:[{id:'same-model',name:r,multiplier:r==='cn'?.2:.7,efforts:[],supportsImages:true}]},accounts:{supported:true,selectedId:null,accounts:[]},logs:{entries:1,failures:0,samples:0,captureArmed:false}}]))
  const sandbox=vm.createContext({React,TextEncoder,TextDecoder,AbortController,setInterval:()=>1,clearInterval(){},clearTimeout(){},setTimeout:()=>1,navigator:{clipboard:{writeText:async()=>{}}},Blob,
   URL:{createObjectURL:()=> 'blob:fixture',revokeObjectURL(){}},document:{body:{appendChild(){}},createElement(){return{click(){downloads.push(this.download)},remove(){}}}},
   window:{__ModuleLoader__:{load(m){api=m.factory(()=>React)}}},
@@ -49,18 +49,10 @@ test('one UI keeps regional drafts, actions, consent, log exports and diagnostic
  await act(async()=>label.props.onChange({target:{value:'intl-only'}}))
  await act(async()=>button('intl','新增独立账号').props.onClick())
  assert.equal(calls.findLast(c=>c.body?.action==='add').url,'/plugins/dsh-codebuddy-cli-intl/accounts');assert.equal(statuses.cn.accounts.accounts.length,0)
- const consent=region('intl').findAllByType('label').find(n=>n.children.some(c=>typeof c==='string' && c===dictionaries['settings.codebuddy-cli-intl-unified'].zh.captureConsent)).findByType('input')
- await act(async()=>consent.props.onChange({target:{checked:true}}))
- await act(async()=>button('intl','采集下一次失败回复').props.onClick())
- assert.equal(statuses.intl.logs.captureArmed,true);assert.equal(statuses.cn.logs.captureArmed,false)
- assert.equal(button('cn','采集下一次失败回复').props.disabled,true)
- await act(async()=>button('intl','导出普通日志').props.onClick())
- assert.match(downloads.at(-1),/dsh-codebuddy-intl-basic-/)
  statuses.intl.usage.lastCall={state:'error',errorCode:'CLI_TIMEOUT',processDiagnostics:{streamReason:'deadline',streamPhase:'after-init',parseStage:'none',frameIndex:2,frameCount:4,frameBytes:20,initCount:1,resultCount:0,lastFrameClass:'assistant',terminationInitiator:'deadline',closeObserved:false,deadlineReached:true},responseDiagnostics:{hasStructuredOutput:false,structuredOutputType:'missing',resultTypeValid:true,finalSubtypeClass:'missing',noticeClass:'network',noticeSource:'stderr'}}
  await act(async()=>button('intl','刷新模型与倍率').props.onClick())
  const text=JSON.stringify(tree.toJSON())
  assert.ok(JSON.stringify(tree.toJSON()).includes('帧 2/4'))
- assert.ok(JSON.stringify(tree.toJSON()).includes('24 MiB'))
  assert.ok(!text.includes('NaN'))
  assert.equal(region('cn').findAllByType('input').find(n=>n.props.list).props.list==='dsh-codebuddy-cn-models',true)
 })
