@@ -1,5 +1,14 @@
 # 更新记录 / Changelog
 
+## 1.0.6 — 模型启用/禁用
+
+- 侧栏“模型”表格新增**启用**勾选列：取消勾选后，该模型不再出现在 DSH 模型选择器，也不能用它给会话发送消息；已停在该模型上的会话需重新选择。
+- 偏好保存在 `%LOCALAPPDATA%\dsh-codebuddy-cli-{cn,intl}\preferences\index.json`（原子写、拒绝符号链接与超大文件）；偏好文件损坏时降级为“未隐藏任何模型”，不会让整个模型目录消失。
+- 服务端在 `listModels` 中按偏好过滤，并在切换后发出 `llm/models-updated`，选择器无需重载页面即可刷新；隐藏按基础模型 ID 记录，多账号共享同一份清单。
+- 护栏：不能停用最后一个可见模型（返回 `MODEL_VISIBILITY_LAST`）；若目录变化导致全部模型都被隐藏，自动回退为完整列表，避免提供方从选择器中消失。
+- 语义提醒：DSH 在发送前会用 `listModels` 校验选择，因此“停用”同时意味着“禁止用该模型发送”，页面已给出明确提示。
+- Add an **Enabled** checkbox per model in the sidebar table. Unchecked models leave the DSH picker and cannot be used to send messages; the choice persists in `%LOCALAPPDATA%\dsh-codebuddy-cli-{cn,intl}\preferences\index.json`. Filtering happens in `listModels` and emits `llm/models-updated`, so the picker refreshes without a reload. The last visible model cannot be disabled, and a fully hidden catalog falls back to the complete list.
+
 ## 1.0.5 — DSH 0.2.2-rc.3 兼容
 
 - 修正版本门禁：`engines.dsh` 与 7 个 DSH peer 依赖由逐版本枚举改为区间 `>=0.2.1-rc.2 <0.3.0-0`，覆盖 0.2.2-rc.2 / rc.3，并预留 rc.4 / rc.5；0.3.0 及以上仍不放行。

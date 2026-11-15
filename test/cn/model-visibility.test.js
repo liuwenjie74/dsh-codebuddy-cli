@@ -1,0 +1,168 @@
+import test from 'node:test'
+import assert from 'node:assert/strict'
+import { registerHooks } from 'node:module'
+import { mkdtemp, mkdir, readFile, writeFile, chmod, rm } from 'node:fs/promises'
+import { tmpdir } from 'node:os'
+import path from 'node:path'
+import { createServer } from 'node:http'
+import { once } from 'node:events'
+
+const schemaStub = `const field=()=>({description(){return this},default(value){this.fallback=value;return this},volatile(){return this}});export default {string:field,number:field,object:shape=>({shape})}`
+registerHooks({
+  resolve(specifier, context, next) {
+    if (specifier === '@deepseek-ai/schemastery') return { url: `data:text/javascript,${encodeURIComponent(schemaStub)}`, shortCircuit: true }
+    if (specifier === '@deepseek-ai/dsh-llm') return { url: 'data:text/javascript,export class LlmAdapter {}', shortCircuit: true }
+    return next(specifier, context)
+  }
+})
+
+const temp = async (t, prefix) => {
+  const directory = await mkdtemp(path.join(tmpdir(), prefix))
+  t.after(() => rm(directory, { recursive: true, force: true }).catch(() => {}))
+  return directory
+}
+
+test('model preferences persist hidden ids, validate input and degrade safely', async (t) => {
+  const { createModelPrefs, preferencesDirectory, validModelId } = await import('../../lib/cn/model-prefs.js')
+  assert.equal(validModelId('future-alpha'), true)
+  assert.equal(validModelId(''), false)
+  assert.equal(validModelId('a'.repeat(257)), false)
+  assert.equal(validModelId('bad\u0000id'), false)
+  assert.match(preferencesDirectory('cn'), /dsh-codebuddy-cli-cn[\\/]preferences$/u)
+
+  const directory = await temp(t, 'dsh-model-prefs-')
+  const store = createModelPrefs({ directory })
+  assert.deepEqual(await store.snapshot(), { hidden: [], storageError: null })
+  assert.equal((await store.hiddenSet()).size, 0)
+
+  const first = await store.setHidden('future-alpha', false)
+  assert.equal(first.changed, true)
+  assert.deepEqual(first.hidden, ['future-alpha'])
+  const repeat = await store.setHidden('future-alpha', false)
+  assert.equal(repeat.changed, false)
+  assert.deepEqual(repeat.hidden, ['future-alpha'])
+  await store.setHidden('new-free-model', false)
+  assert.deepEqual((await store.snapshot()).hidden, ['future-alpha', 'new-free-model'])
+  assert.equal((await store.hiddenSet()).has('new-free-model'), true)
+
+  // A new instance must read the persisted file, not the previous in-memory state.
+  const reloaded = createModelPrefs({ directory })
+  assert.deepEqual((await reloaded.snapshot()).hidden, ['future-alpha', 'new-free-model'])
+  assert.equal((await reloaded.setHidden('future-alpha', true)).changed, true)
+  assert.deepEqual((await reloaded.snapshot()).hidden, ['new-free-model'])
+
+  await assert.rejects(() => reloaded.setHidden('', false), /模型标识无效/u)
+  await assert.rejects(() => reloaded.setHidden('x'.repeat(257), false), /模型标识无效/u)
+  await assert.rejects(() => reloaded.setHidden('future-alpha', 'yes'), /启用状态无效/u)
+
+  const brokenDirectory = await temp(t, 'dsh-model-prefs-broken-')
+  await mkdir(brokenDirectory, { recursive: true })
+  await writeFile(path.join(brokenDirectory, 'index.json'), '{ not json')
+  const broken = createModelPrefs({ directory: brokenDirectory })
+  // A broken preference file must never hide the whole catalog.
+  assert.deepEqual(await broken.snapshot(), { hidden: [], storageError: 'MODEL_PREFS_INVALID' })
+
+  const versionedDirectory = await temp(t, 'dsh-model-prefs-version-')
+  await mkdir(versionedDirectory, { recursive: true })
+  await writeFile(path.join(versionedDirectory, 'index.json'), JSON.stringify({ version: 2, hidden: ['future-alpha'] }))
+  assert.equal((await createModelPrefs({ directory: versionedDirectory }).snapshot()).storageError, 'MODEL_PREFS_INVALID')
+
+  const hugeDirectory = await temp(t, 'dsh-model-prefs-huge-')
+  await mkdir(hugeDirectory, { recursive: true })
+  await writeFile(path.join(hugeDirectory, 'index.json'), 'x'.repeat(70000))
+  assert.equal((await createModelPrefs({ directory: hugeDirectory }).snapshot()).storageError, 'MODEL_PREFS_UNSAFE')
+
+  const fullDirectory = await temp(t, 'dsh-model-prefs-full-')
+  await mkdir(fullDirectory, { recursive: true })
+  await writeFile(path.join(fullDirectory, 'index.json'), JSON.stringify({ version: 1, hidden: Array.from({ length: 500 }, (_, i) => `model-${i}`) }))
+  const full = createModelPrefs({ directory: fullDirectory })
+  await assert.rejects(() => full.setHidden('one-more', false), /最多保存 500/u)
+  assert.equal((await full.setHidden('model-0', true)).changed, true)
+})
+
+test('hiding a model filters listModels, keeps one visible model and updates the status', async (t) => {
+  const { apply } = await import('../../lib/cn/index.js')
+  const directory = await temp(t, 'dsh-model-visibility-')
+  const stateKey = process.platform === 'win32' ? 'LOCALAPPDATA' : process.platform === 'darwin' ? 'HOME' : 'XDG_STATE_HOME'
+  const oldStateRoot = process.env[stateKey]
+  process.env[stateKey] = directory
+  t.after(() => { if (oldStateRoot === undefined) delete process.env[stateKey]; else process.env[stateKey] = oldStateRoot })
+  const binDirectory = process.platform === 'win32'
+    ? path.join(directory, 'node_modules', '@tencent-ai', 'codebuddy-code', 'bin') : directory
+  await mkdir(binDirectory, { recursive: true })
+  const entry = path.join(binDirectory, 'codebuddy')
+  await writeFile(entry, await readFile(new URL('./fixtures/fake-codebuddy.cjs', import.meta.url)))
+  await chmod(entry, 0o755)
+  const executable = process.platform === 'win32' ? path.join(directory, 'codebuddy.cmd') : entry
+  if (process.platform === 'win32') await writeFile(executable, '@echo off\r\n')
+  // Seed the preference file before the plugin loads it, so the filter is exercised on first read.
+  const prefsDirectory = path.join(directory, 'dsh-codebuddy-cli-cn', 'preferences')
+  await mkdir(prefsDirectory, { recursive: true })
+  await writeFile(path.join(prefsDirectory, 'index.json'), JSON.stringify({ version: 1, hidden: ['future-alpha'] }))
+
+  const config = { cliPath: executable, configDir: '', model: 'future-alpha', effort: '', timeoutMs: 15000 }
+  const cleanups = []
+  const routes = new Map()
+  const emitted = []
+  let adapter
+  const ctx = {
+    llm: { registerAdapter(providers, value) { adapter = value; return () => {} } },
+    effect(callback) { const dispose = callback(); if (typeof dispose === 'function') cleanups.push(dispose) },
+    on() {}, emit(name, payload) { emitted.push([name, payload]) }, inject(deps, callback) { callback(ctx) },
+    webServer: { register(route) { routes.set(route.path, route.handler); return () => routes.delete(route.path) } }
+  }
+  let server
+  t.after(async () => {
+    for (const cleanup of cleanups.reverse()) cleanup()
+    if (server) await new Promise((resolve) => server.close(resolve))
+  })
+  apply(ctx, config)
+
+  // The hidden model is filtered, and the configured default must not resurrect it.
+  const models = await adapter.listModels('codebuddy-cli-cn')
+  assert.deepEqual(models.map((model) => model.id), ['new-free-model'])
+
+  server = createServer((req, res) => {
+    const route = routes.get(new URL(req.url, 'http://localhost').pathname)
+    if (!route) { res.writeHead(404); res.end(); return }
+    Promise.resolve(route(req, res)).catch(() => { res.writeHead(500); res.end() })
+  })
+  server.listen(0, '127.0.0.1')
+  await once(server, 'listening')
+  const origin = `http://127.0.0.1:${server.address().port}`
+  const post = async (body) => {
+    const response = await fetch(`${origin}/plugins/dsh-codebuddy-cli-cn/actions`, {
+      method: 'POST', headers: { Origin: origin, 'Content-Type': 'application/json', 'X-DSH-CodeBuddy-Action': '1' }, body: JSON.stringify(body)
+    })
+    return { status: response.status, body: await response.json() }
+  }
+
+  const status = await (await fetch(`${origin}/plugins/dsh-codebuddy-cli-cn/status`)).json()
+  assert.deepEqual(status.modelPreferences, { hidden: ['future-alpha'], storageError: null })
+
+  // The last visible model cannot be hidden.
+  const last = await post({ action: 'setModelVisibility', id: 'new-free-model', enabled: false })
+  assert.equal(last.status, 409)
+  assert.equal(last.body.error, 'MODEL_VISIBILITY_LAST')
+
+  const invalid = await post({ action: 'setModelVisibility', id: '', enabled: false })
+  assert.equal(invalid.status, 400)
+  assert.equal(invalid.body.error, 'invalid-model-visibility')
+
+  const unknown = await post({ action: 'deleteEverything' })
+  assert.equal(unknown.status, 400)
+  assert.equal(unknown.body.error, 'invalid-action')
+
+  const before = emitted.length
+  const enabled = await post({ action: 'setModelVisibility', id: 'future-alpha', enabled: true })
+  assert.equal(enabled.status, 200)
+  assert.deepEqual(enabled.body.modelPreferences, { hidden: [], storageError: null })
+  assert.ok(emitted.slice(before).some(([name, payload]) => name === 'llm/models-updated' && payload === 'codebuddy-cli-cn'))
+  assert.deepEqual((await adapter.listModels('codebuddy-cli-cn')).map((model) => model.id), ['future-alpha', 'new-free-model'])
+  assert.deepEqual(JSON.parse(await readFile(path.join(prefsDirectory, 'index.json'), 'utf8')), { version: 1, hidden: [] })
+
+  const hidden = await post({ action: 'setModelVisibility', id: 'future-alpha', enabled: false })
+  assert.equal(hidden.status, 200)
+  assert.deepEqual(hidden.body.modelPreferences.hidden, ['future-alpha'])
+  assert.deepEqual((await adapter.listModels('codebuddy-cli-cn')).map((model) => model.id), ['new-free-model'])
+})
