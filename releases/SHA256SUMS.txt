@@ -4,3 +4,4 @@ aadea5832ebe07c717a8bf9417fb9eeca8c61bbe864cdf101f071a3d44806a06  dsh-dkn-codebu
 6f9bf879344000ea3d4f90e85dbe74e5abf942d61d1b6cc58c155a429a9beffc  dsh-dkn-codebuddy-cli-1.0.8.tgz
 7aa03c0ef32aeee908f44a1443f621c7565a0bb6972892d26ed949dc6ff944b2  dsh-dkn-codebuddy-cli-1.0.9.tgz
 6e48610ab83ed3a20b6c2850bf94b01dc39be83bdbf45ab5027ce3d6b0ace417  dsh-dkn-codebuddy-cli-1.1.0.tgz
+e46027d664f2938589573506d144e0a7487e7e8b6f3da9b046490505e94ee04a  dsh-dkn-codebuddy-cli-1.1.1.tgz
