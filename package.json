@@ -5,11 +5,11 @@
   "version": "1.0.8",
   "repository": {
     "type": "git",
-    "url": "https://github.com/1924225725-collab/dsh-DKN-codebuddy-cli.git"
+    "url": "https://github.com/liuwenjie74/dsh-DKN-codebuddy-cli.git"
   },
-  "homepage": "https://github.com/1924225725-collab/dsh-DKN-codebuddy-cli#readme",
+  "homepage": "https://github.com/liuwenjie74/dsh-DKN-codebuddy-cli#readme",
   "bugs": {
-    "url": "https://github.com/1924225725-collab/dsh-DKN-codebuddy-cli/issues"
+    "url": "https://github.com/liuwenjie74/dsh-DKN-codebuddy-cli/issues"
   },
   "scripts": {
     "test": "node --test test/cn/*.test.js test/intl/*.test.js test/*.test.js"
