@@ -1,15 +1,12 @@
 # 更新记录 / Changelog
 
-## 1.1.0 — 清理他人痕迹，对外可见名统一为 CodeBuddy
+## 1.1.3 — 默认模型兜底与说明文字收起（第 4 批）
 
-- 对外可见名统一：`package.json` 的 `displayName`、侧栏入口名、四个中英页面标题、反馈包 README 与 ZIP 文件名中的 `DKN`/`dsh-DKN-codebuddy` 全部改为 `CodeBuddy`（ZIP 前缀改为 `dsh-codebuddy-feedback-`）。
-- 内部标识一律未动，因此不出会话、不掉本地数据：包名 `dsh-dkn-codebuddy-cli`、`cordis.patch.yml` 的两行 `name`、client bundle id 与 `BUNDLE_NAME`、locale 命名空间、provider id `codebuddy-cli-cn/intl`、前缀 `llm-codebuddy-cli-cn/intl`、存储目录 `%LOCALAPPDATA%\dsh-codebuddy-cli-{cn,intl}` 保持不变。
-- 删除原始维护者的 QQ 群反馈渠道：`report.json` 的 `support` 字段、反馈 ZIP 内 README 的中英两句、以及 `feedbackIntro`/`feedbackDownloaded`/`feedbackGroup` 等词条中的群号与「群主」表述；`docs/问题反馈.md`、`docs/ISSUE_REPORT.en.md` 随反馈页签早已移除一并删除。
-- 清理死链与死键：删除指向已删文档的 `guideFull`/`guideFullUrl`（中英 × 国内/国际共 8 条），并让国际侧「工具与返回内容适配范围」链接不再被改写为不存在的 `docs/intl/` 路径。
-- 两份迁移文档版本对齐到当前版本（`安装与迁移：1.1.0` / `Install and migrate — 1.1.0`），并去掉「整合版」措辞。
-- 仓库清理：删除 0.3.5/0.3.9/0.4.0/0.4.2/1.0.1/1.0.3/1.0.4 七个历史安装包，`releases/SHA256SUMS.txt` 只保留 1.0.5 起的校验值。
-- 本地测试同步：`test/feedback.test.js` 不再断言群号，改为断言不存在 `support` 字段，并跟随新的 ZIP 文件名前缀。
-- Visible names are now `CodeBuddy`: displayName, sidebar entry, the four page titles and the feedback bundle naming no longer contain `DKN`. Internal ids, provider ids and storage directories are deliberately unchanged so existing sessions and local data keep working. The original maintainer's QQ group support channel is removed from the report payload, the bundle README and the locale strings, and the two orphan feedback documents are deleted. Dead `guideFull` keys are gone and the International compatibility link no longer points at a nonexistent path. Both migration documents now target 1.1.0, and the seven pre-1.0.5 packages were removed from `releases/`.
+- **默认模型兜底**（替代原来的「停用前会话预警」）：`lib/cn|intl/index.js` 的 `stream()` 计算 `selectedModel` 时改为兜底链——请求模型 → 配置的默认模型 → （仅当请求模型确实被停用时）目录中首个已启用模型 → CLI 默认；只是不在目录里的 id 一律原样透传，因为 CLI 可能接受目录快照之外的别名或模型。触发时写入 `runtimeStatus.modelFallback = { requested, used, at }`，并在状态接口的 `usage` 中暴露，界面在使用量区显示一行「请求 X → 实际 Y」。
+- 边界如实说明：`session/model-unavailable` 由 DSH 宿主在发送前抛出（插件 `lib/` 全量 grep 0 命中），该请求到不了适配器，因此「会话停在已停用模型上被拒」这一层插件救不了；兜底覆盖的是仍会到达插件的隐藏/失效/账号变体模型 id。这句也已写进界面文案。
+- 默认模型保留为**自由文本 + 目录建议**的原生组合框（`datalist`）：改成闭式下拉会砍掉「手输目录外 id」这条路，而这条能力必须保住；同一条理由也决定了请求期兜底链只拒绝被停用的 id。
+- **说明文字收起**：新增 `Hint` 组件（`?` 圆钮，悬停展开、点击钉住，`aria-expanded` 同步）。29 处规则/背景类长说明（`intro`、`setupNote`、`cliCheckNote`、`accountNote`、`accountValidation`、`accountPrivacy`、`accountGuideSteps`、`accountGuideErrors`、`modelNote`、`timeoutHelp`、`rewriteClientNamesNote`、`captureRequestSamplesNote`、`catalogNote`、`imagesHelp`、`creditsNote`、`usageNote`、`balanceNote`、`logsNote`、`toolNote`、`regionNote`、`pageEntryHint` 与反馈页 8 条）收进 `?`；状态、结果、错误与会变的值（`saved`/`saving`/`saveFailed`、`saveFirst`、`accountUnsupported`、`feedbackReadOnly`、`channelUnavailable`、`logsStatus`、`rewriteAudit`、`catalogReady/Stale/Empty`、`modelsSelectionStatus`、`requestSize*`、`budgetNote`、`active` 等）仍常显。内容块始终挂在渲染树里（只切 `display`），读屏与既有读树断言不受影响。
+- 词表：`locales/cn.zh.json` / `cn.en.json` 各补 2 键（`hintShow`、`modelFallbackNotice`）；本批一度新增又随组合框回退而删除的 `defaultModel` / `defaultModelFollow` 两键已一并清除，不留死键。
 
 ## 1.1.2 — 真实请求样本与标识覆盖审计（第 3 批）
 
@@ -41,6 +38,17 @@
 - `scripts/release.mjs` 增「词表与链接检查」步骤（排在回归之后、打包之前，护栏不进发布链路等于没有）；`.github/workflows/ci.yml` 增同名步骤；`package.json` 增 `check:locales` / `check:links` / `check:all` / `locales` 四个入口。
 - 验证：生成块一致性、`t()` 键与中英键集合、仓库内链接、语法检查全部通过；回归 cn 119 / intl 108 / root 26（含 3 条检查器用例）= **253 通过 0 失败**；`release.mjs 1.1.1 --dry-run` 走完 11 步 exit 0。
 - 本批未含组件拆分（2B）：`lib/client.js` 仍是单文件，拆分需改为「源码分片 + 拼接生成」并先处理测试里对源码字符串的断言。
+
+## 1.1.0 — 清理他人痕迹，对外可见名统一为 CodeBuddy
+
+- 对外可见名统一：`package.json` 的 `displayName`、侧栏入口名、四个中英页面标题、反馈包 README 与 ZIP 文件名中的 `DKN`/`dsh-DKN-codebuddy` 全部改为 `CodeBuddy`（ZIP 前缀改为 `dsh-codebuddy-feedback-`）。
+- 内部标识一律未动，因此不出会话、不掉本地数据：包名 `dsh-dkn-codebuddy-cli`、`cordis.patch.yml` 的两行 `name`、client bundle id 与 `BUNDLE_NAME`、locale 命名空间、provider id `codebuddy-cli-cn/intl`、前缀 `llm-codebuddy-cli-cn/intl`、存储目录 `%LOCALAPPDATA%\dsh-codebuddy-cli-{cn,intl}` 保持不变。
+- 删除原始维护者的 QQ 群反馈渠道：`report.json` 的 `support` 字段、反馈 ZIP 内 README 的中英两句、以及 `feedbackIntro`/`feedbackDownloaded`/`feedbackGroup` 等词条中的群号与「群主」表述；`docs/问题反馈.md`、`docs/ISSUE_REPORT.en.md` 随反馈页签早已移除一并删除。
+- 清理死链与死键：删除指向已删文档的 `guideFull`/`guideFullUrl`（中英 × 国内/国际共 8 条），并让国际侧「工具与返回内容适配范围」链接不再被改写为不存在的 `docs/intl/` 路径。
+- 两份迁移文档版本对齐到当前版本（`安装与迁移：1.1.0` / `Install and migrate — 1.1.0`），并去掉「整合版」措辞。
+- 仓库清理：删除 0.3.5/0.3.9/0.4.0/0.4.2/1.0.1/1.0.3/1.0.4 七个历史安装包，`releases/SHA256SUMS.txt` 只保留 1.0.5 起的校验值。
+- 本地测试同步：`test/feedback.test.js` 不再断言群号，改为断言不存在 `support` 字段，并跟随新的 ZIP 文件名前缀。
+- Visible names are now `CodeBuddy`: displayName, sidebar entry, the four page titles and the feedback bundle naming no longer contain `DKN`. Internal ids, provider ids and storage directories are deliberately unchanged so existing sessions and local data keep working. The original maintainer's QQ group support channel is removed from the report payload, the bundle README and the locale strings, and the two orphan feedback documents are deleted. Dead `guideFull` keys are gone and the International compatibility link no longer points at a nonexistent path. Both migration documents now target 1.1.0, and the seven pre-1.0.5 packages were removed from `releases/`.
 
 ## 1.0.9 — 覆盖标识独立成块，移除模型页停用提示
 
@@ -92,13 +100,11 @@
 - 依据官方npm实际发布包核对模型、工具、附件、配置表单与侧栏协议；保持原区域/账号/图片请求逻辑。GitHub对应版本标签尚未出现，不将alpha源码作为rc.1依据。
 - Add explicit DSH 0.2.2-rc.1 support while retaining the previously supported 0.2.1 release candidates. Audit the actual official npm artifacts rather than treating GitHub alpha sources as rc.1. Actual desktop acceptance remains pending.
 
-
 ## 1.0.3 — DSH rc.5 兼容
 
 - 兼容声明补齐DSH 0.2.1-rc.4与rc.5，保留rc.2/rc.3。全部DSH peer依赖同步声明。
 - 对照官方rc.3/rc.5完整源码核对模型、附件、配置、侧栏和布局接口；本插件使用的接口无实现变化，区域调用、图片和账号策略沿用1.0.2。
 - Add explicit DSH 0.2.1-rc.4/rc.5 compatibility while retaining rc.2/rc.3. Audited official source contracts; installed desktop rc.5 acceptance remains pending.
-
 
 ## 1.0.2 — 多账号 CLI 兼容
 
@@ -106,7 +112,6 @@
 - 登录脚本绑定生成时检测到的CLI版本，运行时版本变化需重新生成命令。
 - 移除多账号标题中的预览标记，保留真实双账号登录、刷新与扣费归属未验收说明。
 - Support official npm/Node CLI 2.177.0 alongside 2.174.0 for both regions. Pin generated sign-in scripts to the inspected version; keep real dual-account sign-in, refresh and billing validation limits explicit.
-
 
 ## 1.0.1 — 反馈流程优化 / reporting workflow
 

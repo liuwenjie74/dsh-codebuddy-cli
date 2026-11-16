@@ -198,5 +198,7 @@
   "captureRequestSamplesToggle": "启用：把每次请求的系统提示范围（已脱敏、已截断）另存到诊断目录，默认关闭",
   "captureRequestSamplesNote": "开启后，每次请求把「系统提示范围」另存为一份脱敏样本，写入诊断目录下的 requests 子目录：只含系统提示与 system 消息，不含用户、助手与工具消息。密钥、Bearer、data URI、长串、邮箱、长数字与 UUID 会先行遮盖，单份上限 64 KiB，只保留最近 20 份。CLI 自己在 OAuth 分支写入的身份段不经过插件，任何样本都抓不到。切换即时生效，保存在 DSH 配置里。",
   "rewriteAudit": "标识覆盖：本次改写 {hits} 处；插件可见范围内仍有 {residual} 处身份文本未被覆盖（合法运行时路径不计）。",
-  "rewriteAuditSample": "诊断目录中已保存脱敏请求样本 {samples} 份。"
+  "rewriteAuditSample": "诊断目录中已保存脱敏请求样本 {samples} 份。",
+  "hintShow": "显示说明",
+  "modelFallbackNotice": "本次请求的模型不可用，已自动改用默认模型：请求 {requested} → 实际 {used}。停用某模型后，正停在该模型上的既有会话仍需重新选择模型。"
 }
