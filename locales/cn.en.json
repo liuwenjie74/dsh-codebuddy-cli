@@ -208,10 +208,6 @@
   "metricFailures": "Failures",
   "metricSamples": "Detailed samples",
   "metricSamplesRedacted": "Redacted samples",
-  "filterState": "Filter by state",
-  "filterAllCount": "All {count}",
-  "filterEnabledCount": "Enabled {count}",
-  "filterDisabledCount": "Disabled {count}",
   "hintShow": "Show explanation",
   "modelFallbackNotice": "The requested model was unavailable, so the default model was used: requested {requested} → used {used}. A session already sitting on a disabled model still has to pick another model."
 }
