@@ -1,5 +1,16 @@
 # 更新记录 / Changelog
 
+## 1.1.0 — 清理他人痕迹，对外可见名统一为 CodeBuddy
+
+- 对外可见名统一：`package.json` 的 `displayName`、侧栏入口名、四个中英页面标题、反馈包 README 与 ZIP 文件名中的 `DKN`/`dsh-DKN-codebuddy` 全部改为 `CodeBuddy`（ZIP 前缀改为 `dsh-codebuddy-feedback-`）。
+- 内部标识一律未动，因此不出会话、不掉本地数据：包名 `dsh-dkn-codebuddy-cli`、`cordis.patch.yml` 的两行 `name`、client bundle id 与 `BUNDLE_NAME`、locale 命名空间、provider id `codebuddy-cli-cn/intl`、前缀 `llm-codebuddy-cli-cn/intl`、存储目录 `%LOCALAPPDATA%\dsh-codebuddy-cli-{cn,intl}` 保持不变。
+- 删除原始维护者的 QQ 群反馈渠道：`report.json` 的 `support` 字段、反馈 ZIP 内 README 的中英两句、以及 `feedbackIntro`/`feedbackDownloaded`/`feedbackGroup` 等词条中的群号与「群主」表述；`docs/问题反馈.md`、`docs/ISSUE_REPORT.en.md` 随反馈页签早已移除一并删除。
+- 清理死链与死键：删除指向已删文档的 `guideFull`/`guideFullUrl`（中英 × 国内/国际共 8 条），并让国际侧「工具与返回内容适配范围」链接不再被改写为不存在的 `docs/intl/` 路径。
+- 两份迁移文档版本对齐到当前版本（`安装与迁移：1.1.0` / `Install and migrate — 1.1.0`），并去掉「整合版」措辞。
+- 仓库清理：删除 0.3.5/0.3.9/0.4.0/0.4.2/1.0.1/1.0.3/1.0.4 七个历史安装包，`releases/SHA256SUMS.txt` 只保留 1.0.5 起的校验值。
+- 本地测试同步：`test/feedback.test.js` 不再断言群号，改为断言不存在 `support` 字段，并跟随新的 ZIP 文件名前缀。
+- Visible names are now `CodeBuddy`: displayName, sidebar entry, the four page titles and the feedback bundle naming no longer contain `DKN`. Internal ids, provider ids and storage directories are deliberately unchanged so existing sessions and local data keep working. The original maintainer's QQ group support channel is removed from the report payload, the bundle README and the locale strings, and the two orphan feedback documents are deleted. Dead `guideFull` keys are gone and the International compatibility link no longer points at a nonexistent path. Both migration documents now target 1.1.0, and the seven pre-1.0.5 packages were removed from `releases/`.
+
 ## 1.0.9 — 覆盖标识独立成块，移除模型页停用提示
 
 - 【覆盖标识】从「高级连接与默认值（可选）」折叠块中拆出，成为【连接配置】页内的**独立区块**（区块标题「覆盖标识」+ 独立说明），不再随该折叠块一起被折叠。

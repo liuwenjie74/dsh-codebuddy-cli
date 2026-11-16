@@ -27,7 +27,7 @@ function fixture(overrides = {}) {
   vm.runInContext(source, sandbox)
   return { api, kit: api.createFeedbackKit(), downloads }
 }
-const input = () => ({ form: { ...form }, pictures, region: 'cn', status: { provider: 'codebuddy-cli-cn', pluginVersion: '1.0.9', cliCheck: { state: 'available', version: '2.177.0', path: 'DO_NOT_EXPORT_PATH' }, loginCommand: 'DO_NOT_EXPORT_LOGIN', accounts: { accounts: [{ label: 'DO_NOT_EXPORT_ACCOUNT' }], selectedId: eventId }, catalog: { models: [] } }, config: { cliPath: 'DO_NOT_EXPORT_PATH', configDir: 'DO_NOT_EXPORT_CONFIG', timeoutMs: 180000, model: 'configured-not-call-model' }, report: { schemaVersion: 1, environment: { platform: 'win32', arch: 'x64', nodeVersion: '22.20.0', token: 'DO_NOT_EXPORT_ENV_TOKEN' }, entries: [{ id: eventId, state: 'error', model: 'actual-call-model', pluginVersion: '1.0.9', errorCode: 'CLI_TIMEOUT', at: 1793232000000, diagnostics: { requestBytes: 13000000, requestLimitBytes: 12582912, requestLimitStage: 'envelope', streamInputBytes: 13001000 }, processDiagnostics: { channel: 'image-jsonl', totalFrames: 8, tailFrame: true, exitSignal: 'SIGTERM', exitCode: -1, stdoutBytes: 220, deadlineReached: true, elapsedMs: 180000 }, responseDiagnostics: { resultTypePresent: false, hasStructuredOutput: false }, secret: 'DO_NOT_EXPORT_ENTRY', sample: { head: 'PRIVATE_REPLY', originalBytes: 13 } }] }, browser: { userAgent: 'synthetic-browser', timezone: 'Asia/Shanghai', utcOffset: '-480' } })
+const input = () => ({ form: { ...form }, pictures, region: 'cn', status: { provider: 'codebuddy-cli-cn', pluginVersion: '1.1.0', cliCheck: { state: 'available', version: '2.177.0', path: 'DO_NOT_EXPORT_PATH' }, loginCommand: 'DO_NOT_EXPORT_LOGIN', accounts: { accounts: [{ label: 'DO_NOT_EXPORT_ACCOUNT' }], selectedId: eventId }, catalog: { models: [] } }, config: { cliPath: 'DO_NOT_EXPORT_PATH', configDir: 'DO_NOT_EXPORT_CONFIG', timeoutMs: 180000, model: 'configured-not-call-model' }, report: { schemaVersion: 1, environment: { platform: 'win32', arch: 'x64', nodeVersion: '22.20.0', token: 'DO_NOT_EXPORT_ENV_TOKEN' }, entries: [{ id: eventId, state: 'error', model: 'actual-call-model', pluginVersion: '1.1.0', errorCode: 'CLI_TIMEOUT', at: 1793232000000, diagnostics: { requestBytes: 13000000, requestLimitBytes: 12582912, requestLimitStage: 'envelope', streamInputBytes: 13001000 }, processDiagnostics: { channel: 'image-jsonl', totalFrames: 8, tailFrame: true, exitSignal: 'SIGTERM', exitCode: -1, stdoutBytes: 220, deadlineReached: true, elapsedMs: 180000 }, responseDiagnostics: { resultTypePresent: false, hasStructuredOutput: false }, secret: 'DO_NOT_EXPORT_ENTRY', sample: { head: 'PRIVATE_REPLY', originalBytes: 13 } }] }, browser: { userAgent: 'synthetic-browser', timezone: 'Asia/Shanghai', utcOffset: '-480' } })
 const jsonFile = (bundle, name) => JSON.parse(bundle.files.find(x => x.name === name).data)
 function unpack(buffer) {
   const result = new Map()
@@ -94,7 +94,7 @@ test('both diagnostic exporters include trustworthy regional metadata for new lo
 test('feedback preserves regional numeric/termination/size facts, separates configuration and exact event, excludes credentials', async () => {
   const { kit } = fixture()
   const bundle = await kit.prepare(input()), report = jsonFile(bundle, 'report.json'), logs = jsonFile(bundle, 'diagnostics.json')
-  assert.equal(report.region, 'cn'); assert.equal(report.support.qqGroup, '1095591284'); assert.equal(report.support.automaticUpload, false)
+  assert.equal(report.region, 'cn'); assert.equal(report.support, undefined)
   assert.equal(report.automatic.diagnosticMatch, 'exact-id'); assert.equal(report.automatic.selectedEvent.model, 'actual-call-model')
   assert.equal(report.automatic.status.configuration.model, 'configured-not-call-model')
   assert.equal(report.automatic.selectedEvent.diagnostics.requestBytes, 13000000)
@@ -184,7 +184,7 @@ test('feedback UI blocks incomplete submission, uses only regional local read ro
   await act(async () => consent.props.onChange({ target: { checked: true } }))
   assert.equal(button('feedbackDownload').props.disabled, false)
   await act(async () => button('feedbackDownload').props.onClick())
-  assert.match(fixtureApi.downloads.at(-1), /^dsh-dkn-codebuddy-feedback-intl-/)
+  assert.match(fixtureApi.downloads.at(-1), /^dsh-codebuddy-feedback-intl-/)
   assert.equal(calls.length, 3)
   const title = tree.root.findAllByType('input').find(x => x.props['aria-label'] === tZh('feedbacktitle'))
   await act(async () => title.props.onChange({ target: { value: '修改了问题描述以后' } }))
