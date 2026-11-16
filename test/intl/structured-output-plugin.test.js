@@ -5,7 +5,7 @@ import { mkdtemp, mkdir, readFile, writeFile, chmod, rm } from 'node:fs/promises
 import { tmpdir } from 'node:os'
 import path from 'node:path'
 
-const schemaStub = `const field=()=>({description(){return this},default(value){this.fallback=value;return this},volatile(){return this}});export default {string:field,number:field,object:shape=>({shape})}`
+const schemaStub = `const field=()=>({description(){return this},default(value){this.fallback=value;return this},volatile(){return this}});export default {string:field,number:field,boolean:field,object:shape=>({shape})}`
 registerHooks({
   resolve(specifier, context, next) {
     if (specifier === '@deepseek-ai/schemastery') return { url: `data:text/javascript,${encodeURIComponent(schemaStub)}`, shortCircuit: true }

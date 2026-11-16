@@ -7,7 +7,7 @@ import { tmpdir } from 'node:os'
 import { createServer } from 'node:http'
 import { once } from 'node:events'
 
-const stub=`const field=()=>({description(){return this},default(value){this.fallback=value;return this},volatile(){return this}});export default {string:field,number:field,object:shape=>({shape})}`
+const stub=`const field=()=>({description(){return this},default(value){this.fallback=value;return this},volatile(){return this}});export default {string:field,number:field,boolean:field,object:shape=>({shape})}`
 registerHooks({resolve(specifier,context,next){
  if(specifier==='@deepseek-ai/schemastery')return{url:'data:text/javascript,'+encodeURIComponent(stub),shortCircuit:true}
  if(specifier==='@deepseek-ai/dsh-llm')return{url:'data:text/javascript,export class LlmAdapter {}',shortCircuit:true}

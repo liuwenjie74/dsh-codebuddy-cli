@@ -1,5 +1,16 @@
 # 更新记录 / Changelog
 
+## 1.0.8 — 模型批量启用/停用 + 系统提示「覆盖标识」
+
+- 模型目录页改为**批量工具栏**：`停用选中` / `启用选中` / `全选` / `清空` + 筛选输入框；表格首列改为选择复选框，新增「状态」列显示已启用 / 已停用，停用行降透明度（列数 5→7）。
+- `全选` 只作用于**当前筛选结果**，不会选中被筛掉的模型；按钮文字带选中计数（`停用选中（3）`）。
+- 服务端 `setModelVisibility` 接受 `{ ids, enabled }`（继续兼容单条 `{ id, enabled }`），校验数组非空、≤500、逐条合法与去重。
+- 批次护栏按**整体判定**：若整批生效后目录里一个可见模型都不剩，则整批拒绝并返回 `409 MODEL_VISIBILITY_LAST`；「启用」永不被该护栏拦住（否则目录全隐藏后无法恢复）。
+- 偏好存储新增 `setHiddenMany(ids, enabled)`：一次计算、一次原子落盘、返回 `changedIds`；批量操作只发一次 `llm/models-updated` + `llm/adapters-updated`，模型选择器不再连闪。
+- 【连接配置】最下方新增**覆盖标识**开关（默认开启）：在 `makeRequest` 组装完信封后，仅对 `system` 与 `role === 'system'` 的内容做大小写不敏感替换——`You are Claude Code, Anthropic's official CLI for Claude` → `You are WorkBuddy, a coding agent`，`Anthropic's official CLI for Claude` / `Claude Code` / `DeepSeek Harness` → `WorkBuddy`；按长串优先、幂等，并跳过形如 `D:\DeepSeek Harness\...` 的路径片段；用户 / 助手 / 工具消息按原引用返回，逐字不改。
+- 国内版与国际版的目标名同为 **WorkBuddy**（workbuddy.cn / workbuddy.ai），因此 cn 与 intl 共用一份替换表。CLI 自身在 OAuth 分支写入的身份段不经过插件，不在覆盖范围内。
+- Batch enable/disable for the model catalog: a toolbar with Disable selected / Enable selected / Select all / Clear plus a filter box, a selection column and a Status column. Select all applies to the current filter only, and a batch is validated as a whole (a batch that would leave no visible model is rejected atomically; enabling is never blocked). `setHiddenMany` persists once and the catalog is announced once. A new **Cover identity** switch in Connection rewrites client self-names inside the system prompt only (case-insensitive, longest match first, idempotent, path fragments such as `D:\DeepSeek Harness\...` are skipped); user, assistant and tool content is returned by reference and never modified. Both regions target **WorkBuddy**.
+
 ## 1.0.7 — 移除「问题反馈」「使用指南」两个页签
 
 - 配置页导航收窄为**连接配置 / 模型目录 / 账号管理 / 用量与额度**四项；移除「问题反馈」与「使用指南」整块界面（含 `IssueFeedback` 面板与指南 9 条子项）。

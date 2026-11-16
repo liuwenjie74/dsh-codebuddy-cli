@@ -5,7 +5,7 @@ import { mkdtemp, mkdir, readFile, writeFile, chmod, rm } from 'node:fs/promises
 import { tmpdir } from 'node:os'
 import path from 'node:path'
 registerHooks({ resolve(specifier, context, next) {
-  if (specifier === '@deepseek-ai/schemastery') return { url: 'data:text/javascript,export default {object:x=>x,string:()=>({description(){return this},default(){return this},volatile(){return this}}),number:()=>({description(){return this},default(){return this},volatile(){return this}})}', shortCircuit: true }
+  if (specifier === '@deepseek-ai/schemastery') return { url: 'data:text/javascript,export default {object:x=>x,string:()=>({description(){return this},default(){return this},volatile(){return this}}),boolean:()=>({description(){return this},default(){return this},volatile(){return this}}),number:()=>({description(){return this},default(){return this},volatile(){return this}})}', shortCircuit: true }
   if (specifier === '@deepseek-ai/dsh-llm') return { url: 'data:text/javascript,export class LlmAdapter {}', shortCircuit: true }
   return next(specifier, context)
 } })

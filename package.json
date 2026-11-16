@@ -2,7 +2,7 @@
   "name": "dsh-dkn-codebuddy-cli",
   "displayName": "dsh-DKN-codebuddy cli",
   "description": "一个配置入口，两条独立的官方CLI区域通道；账号、模型目录和诊断按区域隔离。",
-  "version": "1.0.7",
+  "version": "1.0.8",
   "repository": {
     "type": "git",
     "url": "https://github.com/1924225725-collab/dsh-DKN-codebuddy-cli.git"

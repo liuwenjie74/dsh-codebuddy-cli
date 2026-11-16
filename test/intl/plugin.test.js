@@ -7,7 +7,7 @@ import path from 'node:path'
 import { createServer } from 'node:http'
 import { once } from 'node:events'
 
-const schemaStub = `const field=()=>({description(){return this},default(value){this.fallback=value;return this},volatile(){return this}});export default {string:field,number:field,object:shape=>({shape})}`
+const schemaStub = `const field=()=>({description(){return this},default(value){this.fallback=value;return this},volatile(){return this}});export default {string:field,number:field,boolean:field,object:shape=>({shape})}`
 registerHooks({
   resolve(specifier, context, next) {
     if (specifier === '@deepseek-ai/schemastery') return { url: `data:text/javascript,${encodeURIComponent(schemaStub)}`, shortCircuit: true }
@@ -253,7 +253,7 @@ test('DSH integration discovers all models, forwards selected IDs and efforts, s
   const processLog = (await logAction('exportDetailedLogs')).body
   assert.equal(processLog.entries.length, 5)
   assert.equal(processLog.entries[0].errorCode, 'CLI_AUTH_REQUIRED')
-  assert.equal(processLog.entries[0].pluginVersion, '1.0.7')
+  assert.equal(processLog.entries[0].pluginVersion, '1.0.8')
   assert.equal(processLog.entries[0].processDiagnostics.exitCode, 0)
   assert.equal(processLog.entries[0].processDiagnostics.stdoutBytes, 0)
   assert.ok(processLog.entries[0].processDiagnostics.stderrBytes > 0)

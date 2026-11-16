@@ -7,7 +7,7 @@ import path from 'node:path'
 import { createServer } from 'node:http'
 import { once } from 'node:events'
 
-const schemaStub = `const field=()=>({description(){return this},default(value){this.fallback=value;return this},volatile(){return this}});export default {string:field,number:field,object:shape=>({shape})}`
+const schemaStub = `const field=()=>({description(){return this},default(value){this.fallback=value;return this},volatile(){return this}});export default {string:field,number:field,boolean:field,object:shape=>({shape})}`
 registerHooks({
   resolve(specifier, context, next) {
     if (specifier === '@deepseek-ai/schemastery') return { url: `data:text/javascript,${encodeURIComponent(schemaStub)}`, shortCircuit: true }
@@ -78,6 +78,21 @@ test('model preferences persist hidden ids, validate input and degrade safely', 
   const full = createModelPrefs({ directory: fullDirectory })
   await assert.rejects(() => full.setHidden('one-more', false), /最多保存 500/u)
   assert.equal((await full.setHidden('model-0', true)).changed, true)
+  await assert.rejects(() => full.setHiddenMany([], false), /模型标识无效/u)
+  await assert.rejects(() => full.setHiddenMany(['ok-id', ''], false), /模型标识无效/u)
+  await assert.rejects(() => full.setHiddenMany(['extra-1', 'extra-2'], false), /最多保存 500/u)
+
+  // A batch persists once and reports exactly which ids changed.
+  const batchDirectory = await temp(t, 'dsh-model-prefs-batch-')
+  const batchStore = createModelPrefs({ directory: batchDirectory })
+  const applied = await batchStore.setHiddenMany(['alpha', 'beta'], false)
+  assert.equal(applied.changed, true)
+  assert.deepEqual(applied.changedIds, ['alpha', 'beta'])
+  assert.deepEqual(JSON.parse(await readFile(path.join(batchDirectory, 'index.json'), 'utf8')), { version: 1, hidden: ['alpha', 'beta'] })
+  const enabling = await batchStore.setHiddenMany(['alpha', 'beta'], true)
+  assert.equal(enabling.changed, true)
+  assert.deepEqual(enabling.hidden, [])
+  assert.equal((await batchStore.setHiddenMany(['alpha'], true)).changed, false)
 })
 
 test('hiding a model filters listModels, keeps one visible model and updates the status', async (t) => {
@@ -165,4 +180,18 @@ test('hiding a model filters listModels, keeps one visible model and updates the
   assert.equal(hidden.status, 200)
   assert.deepEqual(hidden.body.modelPreferences.hidden, ['future-alpha'])
   assert.deepEqual((await adapter.listModels('codebuddy-cli-cn')).map((model) => model.id), ['new-free-model'])
+
+  // A batch is judged as a whole: hiding both models at once leaves none visible.
+  const batchLast = await post({ action: 'setModelVisibility', ids: ['future-alpha', 'new-free-model'], enabled: false })
+  assert.equal(batchLast.status, 409)
+  assert.equal(batchLast.body.error, 'MODEL_VISIBILITY_LAST')
+  assert.deepEqual((await adapter.listModels('codebuddy-cli-cn')).map((model) => model.id), ['new-free-model'])
+
+  // Enabling is never blocked by the guard, and a batch announces the catalog once.
+  const beforeBatchEnable = emitted.length
+  const batchEnable = await post({ action: 'setModelVisibility', ids: ['future-alpha', 'new-free-model'], enabled: true })
+  assert.equal(batchEnable.status, 200)
+  assert.deepEqual(batchEnable.body.modelPreferences, { hidden: [], storageError: null })
+  assert.equal(emitted.slice(beforeBatchEnable).filter(([name]) => name === 'llm/models-updated').length, 1)
+  assert.deepEqual((await adapter.listModels('codebuddy-cli-cn')).map((model) => model.id), ['future-alpha', 'new-free-model'])
 })
