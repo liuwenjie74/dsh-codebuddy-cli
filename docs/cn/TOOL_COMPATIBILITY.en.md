@@ -1,6 +1,6 @@
 # Tool and result compatibility
 
-[简体中文](工具适配范围.md) · [Home](../README.en.md)
+[简体中文](工具适配范围.md) · [Home](../../README.en.md)
 
 For China 0.3.4. Tool names and argument schemas come from DSH at request time; there is no screenshot-tool name allowlist. DSH owns tool execution, permissions and history. Image support does not install a capture tool.
 

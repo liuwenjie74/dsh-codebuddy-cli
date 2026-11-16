@@ -11,7 +11,7 @@
 - 本地测试同步：`test/feedback.test.js` 不再断言群号，改为断言不存在 `support` 字段，并跟随新的 ZIP 文件名前缀。
 - Visible names are now `CodeBuddy`: displayName, sidebar entry, the four page titles and the feedback bundle naming no longer contain `DKN`. Internal ids, provider ids and storage directories are deliberately unchanged so existing sessions and local data keep working. The original maintainer's QQ group support channel is removed from the report payload, the bundle README and the locale strings, and the two orphan feedback documents are deleted. Dead `guideFull` keys are gone and the International compatibility link no longer points at a nonexistent path. Both migration documents now target 1.1.0, and the seven pre-1.0.5 packages were removed from `releases/`.
 
-## 未发布 — 发布链路脚本化（第 1 批）
+## 1.1.1 — 发布链路脚本化与词表外置（第 1、2 批）
 
 - 新增 `scripts/sync-version.mjs`：版本号以 `package.json` 为唯一权威源，同步 `lib/shared/version.js`、`lib/client.js` 的内联常量，以及 README 与两份迁移文档；`--check` 模式下扫描 `lib/`、`test/`、`scripts/` 与 README/`package.json`，发现任何非当前版本的字面量即 exit 1，把「漏改一处就红」变成发布前的确定性失败。
 - 版本号收口：`lib/cn/index.js`、`lib/cn/diagnostics.js`、`lib/intl/index.js`（两处）、`lib/intl/diagnostics.js` 与 `lib/client.js`（两处）不再写死版本字符串；服务端统一 `import { PLUGIN_VERSION }`，客户端 bundle 不能 `import`，改由同步脚本改写其 factory 顶部的内联常量。
@@ -22,6 +22,13 @@
 - 测试桩收口：新增 `test/helpers/schemastery-stub.mjs`，11 个测试文件不再各自复制一份 schemastery 桩（此前新增一个 `boolean` 字段曾让 9 个文件同时 `TypeError`）。
 - `package.json` 的 `scripts` 固化 `--test-force-exit --test-timeout=60000`（治「跑完不退出」与「挂住变静默」），并新增 `test:all`、`check`、`release` 三个入口。
 - 本批不发版：版本号保持当前值，下一批（计划下一次功能变更）再出包。
+
+- **第 2 批：词表外置与两个检查器。** `lib/client.js` 里 6 张词表（国内版中英 195/195 键、国际版中英 247/247 键、反馈面板中英 73/73 键）改为由 `locales/*.json` 生成的内联区块，`locales/` 成为唯一手写来源；新增 `scripts/build-client-locales.mjs`（导出 / 重建 / `--check`，含 round-trip 深等断言，保证生成块与 JSON 逐键一致）。产物仍是 `__ModuleLoader__.load` 自包含单文件、零 import，测试的 `vm.runInContext(readFile(...))` 加载方式不变。
+- 新增 `scripts/check-locales.mjs`：每个 `t('x')` 的键必须在中英两份词表里都存在，三对词表的键集合必须完全一致；无引用键只提示不失败（`t(region.id)` 这类动态键无法静态解析）。这条检查的直接动机是删掉 `modelVisibilityNote` 后 `t('feedbackGroup')` 的渲染仍留着、会在「运行配置未就绪」状态露出空串。
+- 新增 `scripts/check-links.mjs`：Markdown 内部相对链接与代码内 `blob/main/...` 仓库内链接必须可达，外链只记录不判失败（离线或网络抖动不该让 CI 变红）。上线即抓到两个真死链——`docs/cn/工具适配范围.md` 与 `docs/cn/TOOL_COMPATIBILITY.en.md` 里的 `../README.md`、`../README.en.md` 解析成不存在的 `docs/README.md`，已改为 `../../`。
+- `scripts/release.mjs` 增「词表与链接检查」步骤（排在回归之后、打包之前，护栏不进发布链路等于没有）；`.github/workflows/ci.yml` 增同名步骤；`package.json` 增 `check:locales` / `check:links` / `check:all` / `locales` 四个入口。
+- 验证：生成块一致性、`t()` 键与中英键集合、仓库内链接、语法检查全部通过；回归 cn 119 / intl 108 / root 26（含 3 条检查器用例）= **253 通过 0 失败**；`release.mjs 1.1.1 --dry-run` 走完 11 步 exit 0。
+- 本批未含组件拆分（2B）：`lib/client.js` 仍是单文件，拆分需改为「源码分片 + 拼接生成」并先处理测试里对源码字符串的断言。
 
 ## 1.0.9 — 覆盖标识独立成块，移除模型页停用提示
 

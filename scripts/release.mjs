@@ -128,6 +128,15 @@ if (testFiles.length === 0) fail('test/ 下没有找到任何 *.test.js')
 node(['--test', '--test-force-exit', '--test-timeout=60000', ...testFiles])
 log(`[ok] ${testFiles.length} 个测试文件通过`)
 
+// ---- 4b. 词表与链接检查 ----
+// 词表以 locales/*.json 为唯一手写来源，生成块必须一致；t() 的键必须中英都存在；
+// 仓库内链接必须可达。这三条不通过就不该出包——护栏不进发布链路等于没有。
+step('词表与链接检查（生成块、t() 键、仓库内链接）')
+node(['scripts/build-client-locales.mjs', '--check'])
+node(['scripts/check-locales.mjs'])
+node(['scripts/check-links.mjs'])
+log('[ok] 词表与链接检查通过')
+
 // ---- 5. 打包 ----
 const tgzName = `${pkg.name}-${target}.tgz`
 const tgzPath = rel(`releases/${tgzName}`)

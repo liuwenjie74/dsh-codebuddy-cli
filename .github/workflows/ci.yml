@@ -35,3 +35,9 @@ jobs:
 
       - name: Version consistency
         run: node scripts/sync-version.mjs --check
+
+      - name: Locales and links
+        run: |
+          node scripts/build-client-locales.mjs --check
+          node scripts/check-locales.mjs
+          node scripts/check-links.mjs
