@@ -1,5 +1,13 @@
 # 更新记录 / Changelog
 
+## 1.0.9 — 覆盖标识独立成块，移除模型页停用提示
+
+- 【覆盖标识】从「高级连接与默认值（可选）」折叠块中拆出，成为【连接配置】页内的**独立区块**（区块标题「覆盖标识」+ 独立说明），不再随该折叠块一起被折叠。
+- 该开关改为**即时保存**：勾选/取消即写入 DSH 配置并生效，不需要展开折叠块，也不需要按它的「保存」；新增 `saveRewrite()` 单独提交 `rewriteClientNames`，并把该字段从高级连接表单的变更键列表中移除，避免两条保存路径互相干扰。
+- 删除模型目录页那句「取消勾选后，该模型不再出现在 DSH 模型选择器，也不能用它给会话发送消息……」提示及其词条 `modelVisibilityNote`（中英各一条），保留「共 {total} 个模型 · 已选 {selected} 个 · 已停用 {hidden} 个」状态行。
+- 验证：8 个改动文件 `node --check` 通过，回归 250/250（cn 119 / intl 108 / root 23）零失败。
+- The **Cover identity** switch is now its own section on the Connection page instead of living inside the collapsed connection block, and it saves immediately when toggled. The old model-page note (`modelVisibilityNote`) is removed in both locales; the model count status line stays.
+
 ## 1.0.8 — 模型批量启用/停用 + 系统提示「覆盖标识」
 
 - 模型目录页改为**批量工具栏**：`停用选中` / `启用选中` / `全选` / `清空` + 筛选输入框；表格首列改为选择复选框，新增「状态」列显示已启用 / 已停用，停用行降透明度（列数 5→7）。
