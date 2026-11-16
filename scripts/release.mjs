@@ -189,21 +189,41 @@ const tag = `v${target}`
 step(`打 tag ${tag} 并推送（显式 lease，不使用 -f）`)
 if (dryRun) log(`[dry-run] 会把 ${tag} 指向 HEAD 并推送`)
 else {
+  // 注解 tag 的 ref 指向 tag 对象，peel（^{}）后才是指向的提交。
+  // ls-remote 对注解 tag 会同时给出两行，必须分别用：
+  //   ref 原值  -> 用作 --force-with-lease 的期望值（lease 比的是 ref 本身）
+  //   peel 值   -> 用作「是否已指向 HEAD」的判定依据
+  // 早先只用 ref 原值判定，导致 tag 明明推成功了却报「仍不同步」并中断发布。
+  const remoteTag = () => {
+    const ls = git(['ls-remote', '--tags', 'origin', `refs/tags/${tag}`, `refs/tags/${tag}^{}`], { allowFail: true })
+    const shas = new Map()
+    for (const line of ls.out.split(/\r?\n/u).map((l) => l.trim()).filter(Boolean)) {
+      const [sha, ref] = line.split(/\s+/u)
+      if (sha && ref) shas.set(ref, sha)
+    }
+    const raw = shas.get(`refs/tags/${tag}`) ?? ''
+    const peeled = shas.get(`refs/tags/${tag}^{}`) ?? ''
+    return { raw, peeled, commit: peeled || raw }
+  }
+
   const head = git(['rev-parse', 'HEAD']).out.trim()
-  const ls = git(['ls-remote', '--tags', 'origin', `refs/tags/${tag}`], { allowFail: true })
-  const remoteSha = (ls.out.split(/\r?\n/u).map((l) => l.trim()).filter(Boolean).map((l) => l.split(/\s+/u)[0])[0]) || ''
+  const before = remoteTag()
   git(['tag', '-f', tag, '-m', `release ${target}`])
-  if (!remoteSha) {
+  if (!before.raw) {
     git(['push', 'origin', `refs/tags/${tag}`])
-  } else if (remoteSha === head) {
+  } else if (before.commit === head) {
     log(`[ok] 远端 ${tag} 已指向 HEAD，无需推送`)
   } else {
-    git(['push', `--force-with-lease=refs/tags/${tag}:${remoteSha}`, 'origin', `refs/tags/${tag}`])
+    log(`[info] 远端 ${tag} 当前 tag 对象 ${before.raw}，指向提交 ${before.commit || '(未知)'}`)
+    git(['push', `--force-with-lease=refs/tags/${tag}:${before.raw}`, 'origin', `refs/tags/${tag}`])
   }
-  const after = (git(['ls-remote', '--tags', 'origin', `refs/tags/${tag}`], { allowFail: true }).out.split(/\r?\n/u)[0] ?? '').trim()
-  log(`[info] 远端 ${tag}: ${after || '(空)'} / 本地 HEAD: ${head}`)
-  if (after && !after.startsWith(head)) fail(`tag 推送后仍不同步：远端 ${after}，期望 ${head}`)
-  log(`[ok] ${tag} -> ${head}`)
+  const after = remoteTag()
+  const localCommit = git(['rev-parse', `${tag}^{commit}`], { allowFail: true }).out.trim()
+  log(`[info] 远端 ${tag}: tag 对象 ${after.raw || '(空)'} / 指向提交 ${after.commit || '(空)'}；本地 ${tag} -> ${localCommit || '(空)'}；本地 HEAD ${head}`)
+  if (!after.raw) fail(`tag ${tag} 推送后远端仍不存在`)
+  if (after.commit !== head) fail(`tag 推送后仍不同步：远端指向 ${after.commit || '(未知)'}，期望 ${head}`)
+  if (localCommit && localCommit !== head) fail(`本地 ${tag} 指向 ${localCommit}，与 HEAD ${head} 不一致`)
+  log(`[ok] ${tag} -> ${head}（已用 peel 值校验）`)
 }
 
 // ---- 9. Release 与资产 ----
