@@ -12,7 +12,10 @@
     "url": "https://github.com/liuwenjie74/dsh-DKN-codebuddy-cli/issues"
   },
   "scripts": {
-    "test": "node --test test/cn/*.test.js test/intl/*.test.js test/*.test.js"
+    "test": "node --test --test-force-exit --test-timeout=60000 test/cn/*.test.js test/intl/*.test.js test/*.test.js",
+    "test:all": "node --test --test-force-exit --test-timeout=60000 test/cn/*.test.js test/intl/*.test.js test/*.test.js",
+    "check": "node scripts/sync-version.mjs --check",
+    "release": "node scripts/release.mjs"
   },
   "type": "module",
   "main": "lib/index.js",

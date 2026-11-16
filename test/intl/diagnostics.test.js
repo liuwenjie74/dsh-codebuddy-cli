@@ -4,6 +4,7 @@ import { mkdtemp, readFile, writeFile, rm } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import path from 'node:path'
 import { createDiagnosticsStore } from '../../lib/intl/diagnostics.js'
+import { PLUGIN_VERSION } from '../../lib/shared/version.js'
 
 async function setup(t) {
   const directory = await mkdtemp(path.join(tmpdir(), 'dsh-diagnostics-test-'))
@@ -55,7 +56,7 @@ test('basic logs use a field allowlist, persist across restarts and exclude raw 
   assert.equal(detailed.entries[0].processDiagnostics.terminationInitiator, 'adapter-error')
   assert.equal(detailed.entries[0].responseDiagnostics.finalSubtypeClass, 'other')
   assert.equal(detailed.entries[1].sample.head, 'PRIVATE_REPLY')
-  assert.equal(detailed.entries[1].pluginVersion, '1.1.0')
+  assert.equal(detailed.entries[1].pluginVersion, PLUGIN_VERSION)
   assert.equal(detailed.privacy.includesRawReplies, true)
   assert.equal(JSON.stringify(await restored.export()).includes('PRIVATE_REPLY'), false)
 })

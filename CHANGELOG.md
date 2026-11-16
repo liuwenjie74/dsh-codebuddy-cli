@@ -11,6 +11,18 @@
 - 本地测试同步：`test/feedback.test.js` 不再断言群号，改为断言不存在 `support` 字段，并跟随新的 ZIP 文件名前缀。
 - Visible names are now `CodeBuddy`: displayName, sidebar entry, the four page titles and the feedback bundle naming no longer contain `DKN`. Internal ids, provider ids and storage directories are deliberately unchanged so existing sessions and local data keep working. The original maintainer's QQ group support channel is removed from the report payload, the bundle README and the locale strings, and the two orphan feedback documents are deleted. Dead `guideFull` keys are gone and the International compatibility link no longer points at a nonexistent path. Both migration documents now target 1.1.0, and the seven pre-1.0.5 packages were removed from `releases/`.
 
+## 未发布 — 发布链路脚本化（第 1 批）
+
+- 新增 `scripts/sync-version.mjs`：版本号以 `package.json` 为唯一权威源，同步 `lib/shared/version.js`、`lib/client.js` 的内联常量，以及 README 与两份迁移文档；`--check` 模式下扫描 `lib/`、`test/`、`scripts/` 与 README/`package.json`，发现任何非当前版本的字面量即 exit 1，把「漏改一处就红」变成发布前的确定性失败。
+- 版本号收口：`lib/cn/index.js`、`lib/cn/diagnostics.js`、`lib/intl/index.js`（两处）、`lib/intl/diagnostics.js` 与 `lib/client.js`（两处）不再写死版本字符串；服务端统一 `import { PLUGIN_VERSION }`，客户端 bundle 不能 `import`，改由同步脚本改写其 factory 顶部的内联常量。
+- 新增 `scripts/release.mjs`：一条命令完成 bump → 版本同步校验 → `node --check` → 三批回归 → `npm pack` → `SHA256SUMS` → 单次提交 → 推送 `main` → 打/移 tag → 建 Release → 上传资产 → 自校验，并提供 `--dry-run`。tag 一律用**显式 lease 值**推送（`--force-with-lease=refs/tags/<tag>:<远端 sha>`），不再用 `-f`，也不再先 `fetch --tags --force`（那正是此前 `stale info` 失败的根因）。
+- 发布判定口径固定：只以 GitHub 资产接口返回的 `size` 与 `digest` 判定成功；`releases/download/...` 直连成功与否只记录不阻塞，输出里明确标注「本机链路不可达 ≠ 资产缺失」。
+- 新增 `scripts/changelog-section.mjs`：按版本抽取 CHANGELOG 小节作为 Release 正文，本地脚本与 CI 同源，避免两套口径。
+- 新增 `.github/workflows/ci.yml`（push/PR：语法检查 + 三批回归 + 版本一致性校验）与 `.github/workflows/release.yml`（push `v*` tag：先校验 tag 版本 == 包内 version == CHANGELOG 小节，再打包并建 Release、上传资产）。
+- 测试桩收口：新增 `test/helpers/schemastery-stub.mjs`，11 个测试文件不再各自复制一份 schemastery 桩（此前新增一个 `boolean` 字段曾让 9 个文件同时 `TypeError`）。
+- `package.json` 的 `scripts` 固化 `--test-force-exit --test-timeout=60000`（治「跑完不退出」与「挂住变静默」），并新增 `test:all`、`check`、`release` 三个入口。
+- 本批不发版：版本号保持当前值，下一批（计划下一次功能变更）再出包。
+
 ## 1.0.9 — 覆盖标识独立成块，移除模型页停用提示
 
 - 【覆盖标识】从「高级连接与默认值（可选）」折叠块中拆出，成为【连接配置】页内的**独立区块**（区块标题「覆盖标识」+ 独立说明），不再随该折叠块一起被折叠。

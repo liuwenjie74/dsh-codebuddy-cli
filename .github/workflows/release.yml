@@ -1,0 +1,58 @@
+name: Release
+
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - name: Install
+        run: npm ci
+
+      - name: Tests (cn / intl / root)
+        run: npm run test:all
+
+      - name: Version consistency
+        run: node scripts/sync-version.mjs --check
+
+      - name: Tag version must equal package version and CHANGELOG section
+        run: |
+          set -e
+          TAG="${GITHUB_REF_NAME#v}"
+          PKG=$(node -e "console.log(JSON.parse(require('node:fs').readFileSync('package.json','utf8')).version)")
+          echo "tag=$TAG package=$PKG"
+          if [ "$TAG" != "$PKG" ]; then
+            echo "::error::tag 版本 ($TAG) 与 package.json 版本 ($PKG) 不一致，拒绝发布"
+            exit 1
+          fi
+          node scripts/changelog-section.mjs "$TAG" > /tmp/notes.md
+          head -n 3 /tmp/notes.md
+
+      - name: Pack
+        run: npm pack --pack-destination releases
+
+      - name: Create release and upload asset
+        run: |
+          set -e
+          TAG="${GITHUB_REF_NAME}"
+          gh release view "$TAG" >/dev/null 2>&1 || gh release create "$TAG" --title "$TAG" --notes-file /tmp/notes.md
+          for f in releases/*.tgz; do
+            gh release upload "$TAG" "$f" --clobber
+          done
+          gh release view "$TAG" --json assets -q '.assets[] | "\(.name) \(.size) \(.digest)"'

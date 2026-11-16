@@ -1,0 +1,37 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - name: Install
+        run: npm ci
+
+      - name: Syntax check
+        run: |
+          set -e
+          for f in $(git ls-files 'lib/**/*.js' 'scripts/*.mjs' 'test/**/*.js' 'test/**/*.mjs'); do
+            node --check "$f"
+          done
+          echo 'syntax ok'
+
+      - name: Tests (cn / intl / root)
+        run: npm run test:all
+
+      - name: Version consistency
+        run: node scripts/sync-version.mjs --check
