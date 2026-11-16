@@ -193,5 +193,10 @@
   "balance": "积分余额",
   "balanceNote": "剩余积分请在 CodeBuddy 官网“个人主页 → 套餐与用量”查看。模型倍率和本页 Token 统计不代表剩余额度。",
   "openHome": "打开 CodeBuddy 官网查看用量",
-  "toolNote": "模型目录以当前国内 CLI 返回结果为准，账号权限由官方判断。插件传递文本和标准图片附件，工具由 DSH 执行。"
+  "toolNote": "模型目录以当前国内 CLI 返回结果为准，账号权限由官方判断。插件传递文本和标准图片附件，工具由 DSH 执行。",
+  "captureRequestSamples": "采集脱敏请求样本",
+  "captureRequestSamplesToggle": "启用：把每次请求的系统提示范围（已脱敏、已截断）另存到诊断目录，默认关闭",
+  "captureRequestSamplesNote": "开启后，每次请求把「系统提示范围」另存为一份脱敏样本，写入诊断目录下的 requests 子目录：只含系统提示与 system 消息，不含用户、助手与工具消息。密钥、Bearer、data URI、长串、邮箱、长数字与 UUID 会先行遮盖，单份上限 64 KiB，只保留最近 20 份。CLI 自己在 OAuth 分支写入的身份段不经过插件，任何样本都抓不到。切换即时生效，保存在 DSH 配置里。",
+  "rewriteAudit": "标识覆盖：本次改写 {hits} 处；插件可见范围内仍有 {residual} 处身份文本未被覆盖（合法运行时路径不计）。",
+  "rewriteAuditSample": "诊断目录中已保存脱敏请求样本 {samples} 份。"
 }

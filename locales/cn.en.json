@@ -193,5 +193,10 @@
   "balance": "Credits",
   "balanceNote": "Check remaining credits under “Profile → Plan and Usage” on the CodeBuddy website. Model rates and token counters are not remaining credits.",
   "openHome": "Open CodeBuddy usage page",
-  "toolNote": "Models come from the current China CLI; account permissions are enforced by the official service. This plugin sends text and standard image attachments; DSH executes tools."
+  "toolNote": "Models come from the current China CLI; account permissions are enforced by the official service. This plugin sends text and standard image attachments; DSH executes tools.",
+  "captureRequestSamples": "Capture redacted request samples",
+  "captureRequestSamplesToggle": "Apply: save the system-prompt scope of each request (redacted and size-capped) to the diagnostics folder; off by default",
+  "captureRequestSamplesNote": "When on, each request saves one redacted sample of its system-prompt scope under the requests subfolder of the diagnostics directory: system prompt and system messages only, never user, assistant or tool messages. Keys, Bearer tokens, data URIs, long blobs, emails, long numbers and UUIDs are masked first; each sample is capped at 64 KiB and only the newest 20 are kept. The identity block the CLI writes itself in its OAuth branch never passes through this plugin, so no sample can capture it. The switch takes effect immediately and is stored in the DSH configuration.",
+  "rewriteAudit": "Identity coverage: {hits} rewritten in this request; {residual} identity text(s) still uncovered within the plugin-visible scope (legitimate runtime paths are not counted).",
+  "rewriteAuditSample": "Redacted request samples stored in the diagnostics folder: {samples}."
 }

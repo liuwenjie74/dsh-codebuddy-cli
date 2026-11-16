@@ -11,6 +11,18 @@
 - 本地测试同步：`test/feedback.test.js` 不再断言群号，改为断言不存在 `support` 字段，并跟随新的 ZIP 文件名前缀。
 - Visible names are now `CodeBuddy`: displayName, sidebar entry, the four page titles and the feedback bundle naming no longer contain `DKN`. Internal ids, provider ids and storage directories are deliberately unchanged so existing sessions and local data keep working. The original maintainer's QQ group support channel is removed from the report payload, the bundle README and the locale strings, and the two orphan feedback documents are deleted. Dead `guideFull` keys are gone and the International compatibility link no longer points at a nonexistent path. Both migration documents now target 1.1.0, and the seven pre-1.0.5 packages were removed from `releases/`.
 
+## 1.1.2 — 真实请求样本与标识覆盖审计（第 3 批）
+
+- 新增 `lib/shared/request-audit.js`：把「系统提示范围」抽成可审计样本——`systemScopeTexts()` 只取 `envelope.system` 与 `role === 'system'` 的消息正文（用户、助手、工具消息一律不进样本），`redactText()` 按「最具体优先」遮盖 `sk-/pk-/rk-` 密钥、Bearer、data URI、≥64 字符长串、邮箱、长数字与 UUID 后再截断（先脱敏后截断，避免把密钥切成半截），`buildRequestSample()` 输出 ≤64 KiB 的结构化样本并附 `includesUserContent: false` 与 `identities` 统计。
+- `lib/shared/prompt-rewrite.js` 新增 `scanIdentities()`：复用现有 4 条替换表与同一个 `looksLikePath()`，把命中分成 `guarded`（紧跟在路径分隔符后、属于 `D:\\DeepSeek Harness\\resources\\...` 这类合法运行时路径）与 `uncovered`（真正漏覆的文本）。**替换表本身一条都没改**，不在未验证的功能上叠加未验证的改动。
+- `lib/cn|intl/request.js`：新增审计块 `rewrite = { enabled, hits, residual }`，`residual` 在**改写后的**系统范围上计算；`captureRequestSamples === true` 时另附 `requestSample`。两者都与 `diagnostics` 并列返回、不混入其中——`diagnostics` 的既有契约是「只放扁平数值」，`test/cn|intl/request.test.js` 有断言守着这条，本批因此特意没有改动那条断言。
+- `lib/cn|intl/index.js`：新增配置 `captureRequestSamples`（默认关、`.volatile()`），样本交给 `recordRequestSample()` 落盘并从 per-call diagnostics 中摘除。
+- `lib/cn|intl/diagnostics.js`：新增 `recordRequestSample()`——独立 `logs/requests/<ts>-<id>.json`、原子写、目录 0o700 / 文件 0o600、单份 ≤64 KiB、只保留最近 20 份；`status()` 增 `requestSamples`；`report().privacy` 增 `requestSamplesOnDisk` 并保持 `includesRequests: false`（导出不夹带样本）。同时修掉一个会让审计失效的问题：`summary()` 的 diagnostics 白名单会丢掉 `rewrite`，现在两侧都显式保留。
+- 界面：`【连接配置】→ 覆盖标识` 下方新增默认关闭的「采集脱敏请求样本」勾选框（独立即时保存，与「覆盖标识」同形，不需要展开高级连接表单、也不需要按它的保存）；诊断日志区新增两行只读审计——本次改写命中数与插件可见范围内仍未覆盖的身份文本数（合法运行时路径不计），以及磁盘上已有脱敏样本数。
+- 词表：`locales/cn.zh.json` / `cn.en.json` 各补 5 键，生成块由 `scripts/build-client-locales.mjs` 重建。
+- 边界如实写进界面文案：CLI 在 OAuth 分支自己写入的身份段不经过插件，**任何样本都抓不到**；本批能验证的是「真实 `makeRequest` 输出现状 + 插件可见范围内的残留审计」，不是「逐请求检测 CLI 侧未覆盖段」。
+- 测试：新增 `test/request-audit.test.js`（pathGuard 不计漏覆、脱敏先于截断、样本只含系统范围、64 KiB 上限、`makeRequest` 端到端、开关默认关、关闭时零改写）。
+
 ## 1.1.1 — 发布链路脚本化与词表外置（第 1、2 批）
 
 - 新增 `scripts/sync-version.mjs`：版本号以 `package.json` 为唯一权威源，同步 `lib/shared/version.js`、`lib/client.js` 的内联常量，以及 README 与两份迁移文档；`--check` 模式下扫描 `lib/`、`test/`、`scripts/` 与 README/`package.json`，发现任何非当前版本的字面量即 exit 1，把「漏改一处就红」变成发布前的确定性失败。
