@@ -83,3 +83,15 @@ test('both regions fall back from an unusable model instead of failing the reque
     assert.ok(source.includes('!hiddenModels.has(id)'), `${name} must respect the disabled-model set`)
   }
 })
+
+test('the hint popover is out of flow so hovering cannot flicker the glyph', () => {
+  // Regression: an in-flow column body grew the wrapper on hover, re-centring the
+  // 16px glyph in its row and sliding it out from under the cursor (mouseleave ->
+  // close -> slide back -> mouseenter -> open, forever). The wrapper must keep a
+  // constant box and the body must be an absolute popover.
+  assert.ok(client.includes("position: 'relative', verticalAlign: 'middle'"), 'Hint wrapper must be a constant-size relative box')
+  assert.ok(client.includes("display: open ? 'block' : 'none', position: 'absolute'"), 'Hint body must be an out-of-flow absolute popover')
+  const hint = client.slice(client.indexOf('function Hint('), client.indexOf('const PANEL_ID'))
+  const beforeButton = hint.slice(0, hint.indexOf("h('button'"))
+  assert.ok(beforeButton.includes('onMouseEnter'), 'hover must be handled on the wrapper, so moving into the popover keeps it open')
+})

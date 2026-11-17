@@ -1,5 +1,14 @@
 # 更新记录 / Changelog
 
+## 1.1.7 — 模型页排序与批量撤销、保存前预检、错误码处置指引（第 4 批）
+
+- **修复悬停闪烁**：`Hint` 的说明正文原先是流内列布局，悬停展开时撑高外层 `span`，父行 `alignItems:center` 随之把 16px 图标重新居中、滑出光标，触发 `mouseleave`→关闭→滑回→`mouseenter`→再展开的死循环。改为：外层 `span` 是恒定 `position:relative` 的 16×16 盒子，正文改成 `position:absolute` 浮层（`top:100%`、`zIndex:60`、`maxWidth:320`），展开不再改变外层尺寸；`onMouseEnter/onMouseLeave` 移到外层，移入浮层不关闭。`aria-expanded`、`display: open ? 'block' : 'none'` 与内容常驻渲染树保持不变。`test/hint.test.js` 新增「浮层必须脱离文档流、悬停 handler 必须在外层」的回归断言。
+- **⑩ 模型页增强（只做排序 + 批量撤销）**：模型目录表头「模型 / 状态 / 倍率 / 上下文」四列可点击排序，循环 升序→降序→取消，`th` 带 `aria-sort`，排序只作用于当前搜索可见列表 `shown`；不新增筛选/分组/导入导出（上一批刚删掉状态筛选下拉，避免再加回隐性歧义）。批量「停用选中 / 启用选中」成功后记录 `lastBatch`，工具行出现「撤销上一步」按钮，反向调用 `toggleModelBatch(ids, !enabled, false)` 且不再记录，用后按钮消失。新键 `undoBatch`、`sortHint` 仅加 `cn.zh/en`，国际版经 `commonZh` 合并继承。
+- **⑪ 保存前自动预检（preflight）**：`lib/cn|intl/index.js` 的 action 白名单加 `preflight`，校验**即将保存的草稿**而非已存配置——`configOf()` 读取时会把 `timeoutMs` 静默夹到 [15000,600000]，越界值若不在此拦截就会被提交、直到请求期才暴露。三项检查：`timeoutMs` 须为 15000–600000 的安全整数（否则 `PREFLIGHT_TIMEOUT_RANGE`）；`cliPath` 非空时 `resolveCli` 必须命中（否则 `CLI_NOT_FOUND`）；`configDir` 非空时必须是已存在且可写的目录（否则 `PREFLIGHT_CONFIG_DIR`）；空值记 `skipped` 不算失败。客户端 `save()` 在有改动时先 POST `preflight`，`ok===false` 则定位首个失败项、弹出「保存前检查未通过：{item}（{code}）」并**保持 dirty、不提交**；通过才 `commit`。不新增按钮。
+- **⑫ 错误码处置指引**：新增 `locales/guidance.zh.json` / `guidance.en.json`（cn/intl 共用一张 `fix_<CODE>` 表，43 键），覆盖 `lib/` 中以错误码形式抛出/返回的 35 个 CODE 及客户端兜底码。`scripts/build-client-locales.mjs` 增 guidance 两块生成区；`scripts/check-locales.mjs` 增守护——扫描 `lib/` 收集所有错误码，任一码在中英指引里缺 `fix_CODE` 即发布前硬失败。客户端把 guidance 并入两区词典，`guidance(code)` 查表（缺键回退空串、不泄漏裸键），在最近一次失败、历史失败明细与被预检拦下的保存三处渲染对应处置建议。
+- 测试：`test/cn|intl/model-visibility.test.js` 各补 preflight 用例（超时越界 / CLI 不存在 / 配置目录非目录 / 合法 / 空值跳过）；新增 `test/guidance.test.js`（两区注册 + 三处渲染 + 键形与中英非空）；`test/hint.test.js` 补闪烁回归。
+- 验证：生成块一致、版本一致、155 个 `t()` 键中英齐备、35 个错误码处置指引齐全、12 个 Markdown 内部链接全部可达；回归 cn 119 / intl 108 / root 43 = **270 通过 0 失败**。
+
 ## 1.1.6 — 工具栏常显与用量页留白修正（第 4 批收尾）
 
 - 模型目录区把「停用选中 / 启用选中 / 清空 / 搜索框」移到表格上方的常显工具行：按钮不再只在勾选后才出现（未选中时禁用并回落到通用文案），搜索框也回到这个工具行，与列表紧邻。

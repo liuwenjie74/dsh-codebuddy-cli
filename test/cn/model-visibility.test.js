@@ -194,4 +194,34 @@ test('hiding a model filters listModels, keeps one visible model and updates the
   assert.deepEqual(batchEnable.body.modelPreferences, { hidden: [], storageError: null })
   assert.equal(emitted.slice(beforeBatchEnable).filter(([name]) => name === 'llm/models-updated').length, 1)
   assert.deepEqual((await adapter.listModels('codebuddy-cli-cn')).map((model) => model.id), ['future-alpha', 'new-free-model'])
+
+  // ⑪ Preflight validates the raw draft about to be saved, not the stored config
+  // (configOf clamps timeoutMs on read, so an out-of-range draft must be caught here).
+  const findCheck = (report, key) => report.checks.find((check) => check.key === key)
+  const badTimeout = await post({ action: 'preflight', cliPath: executable, configDir: '', timeoutMs: 5 })
+  assert.equal(badTimeout.status, 200)
+  assert.equal(badTimeout.body.ok, false)
+  assert.equal(findCheck(badTimeout.body, 'timeoutMs').code, 'PREFLIGHT_TIMEOUT_RANGE')
+  assert.equal(findCheck(badTimeout.body, 'cliPath').ok, true)
+
+  const missingCli = await post({ action: 'preflight', cliPath: path.join(directory, 'does-not-exist.cmd'), configDir: '', timeoutMs: 180000 })
+  assert.equal(missingCli.body.ok, false)
+  assert.equal(findCheck(missingCli.body, 'cliPath').code, 'CLI_NOT_FOUND')
+
+  const notADirectory = path.join(directory, 'plain-file.txt')
+  await writeFile(notADirectory, 'x')
+  const badDir = await post({ action: 'preflight', cliPath: executable, configDir: notADirectory, timeoutMs: 180000 })
+  assert.equal(badDir.body.ok, false)
+  assert.equal(findCheck(badDir.body, 'configDir').code, 'PREFLIGHT_CONFIG_DIR')
+
+  const good = await post({ action: 'preflight', cliPath: executable, configDir: directory, timeoutMs: 180000 })
+  assert.equal(good.status, 200)
+  assert.equal(good.body.ok, true)
+  assert.deepEqual(good.body.checks.map((check) => check.ok), [true, true, true])
+
+  // Empty cliPath/configDir are skipped, not failed.
+  const skipped = await post({ action: 'preflight', cliPath: '', configDir: '', timeoutMs: 180000 })
+  assert.equal(skipped.body.ok, true)
+  assert.equal(findCheck(skipped.body, 'cliPath').skipped, true)
+  assert.equal(findCheck(skipped.body, 'configDir').skipped, true)
 })

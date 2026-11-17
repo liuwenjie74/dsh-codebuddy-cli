@@ -9,7 +9,7 @@
 // 这条检查的直接动机：删掉 modelVisibilityNote 词条后，t('feedbackGroup') 的渲染还留着，
 // 会在「运行配置未就绪」状态露出空串——词表与渲染之间缺一致性约束。
 
-import { readFile } from 'node:fs/promises'
+import { readFile, readdir } from 'node:fs/promises'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
@@ -56,8 +56,32 @@ if (unused.length > 0) {
   console.log('[info] 未被 t() 字面量引用的键 ' + unused.length + ' 个（可能含动态键，仅提示）：' + unused.join(', '))
 }
 
+// ⑫ 错误码处置指引：cn/intl 共用一张 fix_<CODE> 表。lib 里每一个以错误码形式
+// 抛出或返回的 CODE，都必须在中英两份指引里各有一条 fix_CODE，否则用户看到
+// 裸码却无处可查。指引键由 t('fix_' + code) 动态引用，不走上面的字面量检查。
+const guidanceZhKeys = await readKeys('locales/guidance.zh.json')
+const guidanceEnKeys = await readKeys('locales/guidance.en.json')
+for (const key of guidanceZhKeys) if (!guidanceEnKeys.has(key)) errors.push('guidance：locales/guidance.en.json 缺少键 ' + key)
+for (const key of guidanceEnKeys) if (!guidanceZhKeys.has(key)) errors.push('guidance：locales/guidance.zh.json 缺少键 ' + key)
+const codeRe = /(?:CodeBuddyCliError\(\s*|error:\s*|code:\s*|errorCode:\s*)['"]([A-Z][A-Z0-9_]+)['"]/g
+const thrownCodes = new Set()
+async function scanCodes(dir) {
+  for (const entry of await readdir(dir, { withFileTypes: true })) {
+    const full = path.join(dir, entry.name)
+    if (entry.isDirectory()) { await scanCodes(full); continue }
+    if (!entry.name.endsWith('.js')) continue
+    for (const match of (await readFile(full, 'utf8')).matchAll(codeRe)) thrownCodes.add(match[1])
+  }
+}
+await scanCodes(rel('lib'))
+for (const code of thrownCodes) {
+  const key = 'fix_' + code
+  if (!guidanceZhKeys.has(key)) errors.push('错误码 ' + code + ' 缺少中文处置指引 ' + key)
+  if (!guidanceEnKeys.has(key)) errors.push('错误码 ' + code + ' 缺少英文处置指引 ' + key)
+}
+
 if (errors.length > 0) {
   for (const error of errors) console.error('[fail] ' + error)
   process.exit(1)
 }
-console.log('[ok] ' + used.size + ' 个 t() 键在中英词表中都存在；三对词表键集合一致')
+console.log('[ok] ' + used.size + ' 个 t() 键在中英词表中都存在；各对词表键集合一致；' + thrownCodes.size + ' 个错误码处置指引齐全')

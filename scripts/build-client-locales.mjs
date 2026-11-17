@@ -26,6 +26,8 @@ const BLOCKS = [
   ['intlLocaleEn', 'locales/intl.en.json'],
   ['feedbackZh', 'locales/feedback.zh.json'],
   ['feedbackEn', 'locales/feedback.en.json'],
+  ['guidanceZh', 'locales/guidance.zh.json'],
+  ['guidanceEn', 'locales/guidance.en.json'],
 ]
 
 const banner = (file) => '      // 由 ' + file + ' 生成，请勿手改；改词表请改该 JSON 后运行 node scripts/build-client-locales.mjs'
