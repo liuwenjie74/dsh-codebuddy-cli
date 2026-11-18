@@ -94,7 +94,8 @@ test('the hint popover is out of flow so hovering cannot flicker the glyph', () 
   // close -> slide back -> mouseenter -> open, forever). The wrapper must keep a
   // constant box and the body must be an absolute popover.
   assert.ok(client.includes("position: 'relative', verticalAlign: 'middle'"), 'Hint wrapper must be a constant-size relative box')
-  assert.ok(client.includes("display: open ? 'block' : 'none', position: 'absolute'"), 'Hint body must be an out-of-flow absolute popover')
+  assert.ok(client.includes("display: open ? 'block' : 'none', position: 'fixed'"), 'Hint body must be an out-of-flow fixed popover so ancestor overflow cannot clip it')
+  assert.ok(client.includes("background: 'Canvas', color: 'CanvasText'"), 'popover must use the matched Canvas/CanvasText pair, never a background-only token')
   const hint = client.slice(client.indexOf('function Hint('), client.indexOf('const PANEL_ID'))
   const beforeButton = hint.slice(0, hint.indexOf("h('button'"))
   assert.ok(beforeButton.includes('onMouseEnter'), 'hover must be handled on the wrapper, so moving into the popover keeps it open')
