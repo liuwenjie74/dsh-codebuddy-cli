@@ -2,9 +2,9 @@
 
 [English](README.en.md)
 
-**2.1.10，支持 DSH >=0.2.1-rc.2 <1.1.7（含 0.2.2-rc.1 / rc.2 / rc.3）。**
+**2.1.11，支持 DSH >=0.2.1-rc.2 <1.1.7（含 0.2.2-rc.1 / rc.2 / rc.3）。**
 
-[下载最新版](https://github.com/liuwenjie74/dsh-DKN-codebuddy-cli/releases/download/v2.1.10/dsh-dkn-codebuddy-cli-1.1.0.tgz) 一个安装包、一个 CodeBuddy 侧栏入口，内部保留国内与国际两个官方 CLI 提供方。DSH 继续管理会话和业务工具。
+[下载最新版](https://github.com/liuwenjie74/dsh-DKN-codebuddy-cli/releases/download/v2.1.11/dsh-dkn-codebuddy-cli-1.1.0.tgz) 一个安装包、一个 CodeBuddy 侧栏入口，内部保留国内与国际两个官方 CLI 提供方。DSH 继续管理会话和业务工具。
 
 配置页顶部选择国内／国际，再选择连接、模型、账号、用量与日志查看板块。页面切换不改变会话使用的提供方，模型仍须在 DSH 会话中明确选择。
 
