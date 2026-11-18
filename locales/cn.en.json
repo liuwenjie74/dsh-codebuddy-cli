@@ -166,7 +166,7 @@
   "filterModels": "Filter",
   "batchSaved": "Saved the enabled state for {count} models.",
   "modelsSelectionStatus": "{total} models · {selected} selected · {hidden} disabled · updated {time}",
-  "rewriteTitle": "Cover identity",
+  "rewriteTitle": "Feature switches",
   "rewriteClientNames": "Cover identity",
   "rewriteClientNamesToggle": "Apply: rewrite client self-names in the system prompt to WorkBuddy",
   "rewriteClientNamesNote": "When on, client self-names in the request system prompt are replaced with WorkBuddy, case-insensitively, in the system prompt only; a user message that mentions these names is left untouched. The identity the CLI writes itself (OAuth branch) is out of scope. The switch takes effect immediately and is stored in the DSH configuration.",

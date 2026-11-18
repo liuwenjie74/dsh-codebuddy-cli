@@ -166,7 +166,7 @@
   "filterModels": "筛选",
   "batchSaved": "已保存 {count} 个模型的启用状态。",
   "modelsSelectionStatus": "共 {total} 个模型 · 已选 {selected} 个 · 已停用 {hidden} 个 · 更新于 {time}",
-  "rewriteTitle": "覆盖标识",
+  "rewriteTitle": "功能开关",
   "rewriteClientNames": "覆盖标识",
   "rewriteClientNamesToggle": "启用：把系统提示里的客户端自称统一改为 WorkBuddy",
   "rewriteClientNamesNote": "开启后，请求体系统提示里的客户端自称统一替换为 WorkBuddy，大小写不敏感，只作用于系统提示范围；用户消息即使提到这些名字也不会被改动。CLI 自己写入身份段（OAuth 分支）不在覆盖范围内。切换即时生效，保存在 DSH 配置里，重启后仍然有效。",
