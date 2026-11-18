@@ -1,5 +1,23 @@
 # 更新记录 / Changelog
 
+## 2.0.0 — 设置页按设计稿重做视觉与交互（UI 重构里程碑）
+
+- **视觉语言整体重做**：按设计稿复刻顶栏（CB 方块标识 + 标题 + 副标题 + 版本胶囊 + 超时提示）、卡片化信息区、下划线式页签、iOS 风格开关、chip 状态徽标、170px 标签列字段行、深色日志框观感。新增 `Card` / `Field` / `Chip` / `Switch` 四个可复用组件，与一组设计令牌常量（`T_TEXT` / `T_MUTED` / `T_LINE` / `T_SOFT` / `T_BRAND` / `T_OK` / `T_WARN`）。
+- **主题一致**：设计稿写死浅色调色板，本实现全部映射到 DSH 主题令牌（`--dsw-alias-label-primary` / `label-secondary` / `border-primary` / `background-primary` / `background-secondary` 等，并带浅色回退），因此深色模式同样可读；不采用硬编码色值。
+- **状态条**：原三项大号 KPI 卡片改为一行四格紧凑状态条（CLI 状态 / 已启用 ÷ 总数 / 当前账号 / 本进程调用），每格带状态圆点、粗体值与右侧提示，点击仍可直达对应页签。
+- **页签与卡片头**：`SectionHeading` 升级为卡片头栏（负外边距贴住卡片顶边、单条分隔线、14px/600 标题 + 15px 图标），连接页、模型页、账号页、用量页、额度区、诊断区一次性获得统一的卡片头结构。
+- **字段行**：`label()` 由「标签在上、控件在下」改为设计稿的 `.frow` 形态（左侧 170px 灰色标签列、右侧值区），高级连接中的 `cliPath` / `configDir` / `model` / `effort` / `timeoutMs` 五处直接受益。
+- **功能开关**：客户端标识覆盖与脱敏请求样本采集两项由单行 checkbox 改为「标题 + 说明 + 右侧 iOS 开关」的行式布局，各自仍独立即时保存，说明文字仍走可展开的信息徽标。
+- **信息图标**：`Hint` 触发器由 16px 描边 SVG 改为设计稿的 15px「i」圆形徽标；浮层仍是 `position: absolute` + `display: open ? 'block' : 'none'`，`aria-expanded`、内容常驻渲染树、悬停不闪烁三项性质保持不变（`test/hint.test.js` 契约继续成立）。
+- **模型页**：状态列改为 chip，新增第 8 列「启用」开关（每行独立启停）；**保留**列头排序、表头全选、批量停用/启用、撤销上一步与搜索框（只留搜索一个筛选入口，不加回状态筛选 chip）。
+- **连接页主卡**：改为「状态 chip + 重新检测（次按钮）+ 一键配置（主按钮）」+「可执行文件 / 版本」两行字段，主次按钮层级与设计稿一致。
+- **账号区**：每个独立环境由纯文本块改为行卡（边框圆角 + 名称 + 「当前」chip + 登录状态 chip + 单行用量摘要），按钮组保持在下方，字段来源未变（`id` / `label` / `createdAt` / `credentialsPresent` / `activeCalls` / `usage`）。
+- **用量与诊断**：用量区新增四格统计（本进程调用 / 输入 tokens / 输出 tokens / 失败），诊断区四格指标改用统一 `.stat` 样式（12px 灰标签 + 20px 加粗数值 + 描边浅底）。额度区改为按钮式官网入口，文案继续如实说明「额度需去官网查看」。
+- **单文件内部模块化（原计划 2B）**：在 `lib/client.js` 内部按职责分区并加注释（词表 / 浏览器 helper / 视图组件），**保持 `window.__ModuleLoader__.load` 自包含单文件、零 import**，测试的 `vm.runInContext(readFile(...))` 加载方式不变。
+- **未引入任何新后端字段**：额度类（已用百分比 / 剩余额度 / 周期重置日 / 套餐等级）本版一律不接，界面不出现假进度条、假百分比或假重置日；「按模型额度分摊」改为后续批次的「按模型消耗统计」课题。
+- **词表**：新增 `timeoutChip`、`modelEnable`、`usageInput`、`usageOutput`、`statFailures`、`cliExecutable`、`cliVersionLabel` 七个键，生成块由 `scripts/build-client-locales.mjs` 重建。
+- 验证：生成块一致、`node --check lib/client.js` 通过、158 个 `t()` 键中英齐备、35 个错误码处置指引齐全、12 个 Markdown 内部链接全部可达、版本一致性检查通过；回归 cn 119 / intl 108 / root 43 = **270 通过 0 失败**。
+
 ## 1.1.7 — 模型页排序与批量撤销、保存前预检、错误码处置指引（第 4 批）
 
 - **修复悬停闪烁**：`Hint` 的说明正文原先是流内列布局，悬停展开时撑高外层 `span`，父行 `alignItems:center` 随之把 16px 图标重新居中、滑出光标，触发 `mouseleave`→关闭→滑回→`mouseenter`→再展开的死循环。改为：外层 `span` 是恒定 `position:relative` 的 16×16 盒子，正文改成 `position:absolute` 浮层（`top:100%`、`zIndex:60`、`maxWidth:320`），展开不再改变外层尺寸；`onMouseEnter/onMouseLeave` 移到外层，移入浮层不关闭。`aria-expanded`、`display: open ? 'block' : 'none'` 与内容常驻渲染树保持不变。`test/hint.test.js` 新增「浮层必须脱离文档流、悬停 handler 必须在外层」的回归断言。

@@ -2,7 +2,7 @@
 
 [简体中文](README.md)
 
-**Unified 1.1.7 supports DSH >=0.2.1-rc.2 <0.3.0 (including 0.2.2-rc.1 / rc.2 / rc.3).**
+**Unified 1.1.7 supports DSH >=0.2.1-rc.2 <1.1.7 (including 0.2.2-rc.1 / rc.2 / rc.3).**
 
 [Download v1.1.7](https://github.com/liuwenjie74/dsh-DKN-codebuddy-cli/releases/download/v1.1.7/dsh-dkn-codebuddy-cli-1.1.0.tgz) One package and one CodeBuddy sidebar page contain two separate official CLI providers. DSH retains conversation and business-tool control.
 

@@ -2,7 +2,7 @@
 
 [English](README.en.md)
 
-**1.1.7，支持 DSH >=0.2.1-rc.2 <0.3.0（含 0.2.2-rc.1 / rc.2 / rc.3）。**
+**1.1.7，支持 DSH >=0.2.1-rc.2 <1.1.7（含 0.2.2-rc.1 / rc.2 / rc.3）。**
 
 [下载最新版](https://github.com/liuwenjie74/dsh-DKN-codebuddy-cli/releases/download/v1.1.7/dsh-dkn-codebuddy-cli-1.1.0.tgz) 一个安装包、一个 CodeBuddy 侧栏入口，内部保留国内与国际两个官方 CLI 提供方。DSH 继续管理会话和业务工具。
 

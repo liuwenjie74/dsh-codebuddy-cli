@@ -3,7 +3,7 @@
 //
 // 权威源只有一个：package.json 的 version 字段。
 // 本脚本负责把它同步到两处运行时/客户端常量，以及 README 与两份迁移文档；
-// 并在 --check 模式下做「全仓不得残留与当前版本不同的 1.x.y 字面量」硬校验。
+// 并在 --check 模式下做「全仓不得残留与当前版本不同的三段式版本字面量」硬校验。
 //
 // 用法：
 //   node scripts/sync-version.mjs          写入
@@ -60,7 +60,20 @@ for (const [file, pattern] of constTargets) {
 
 // ---- 2. 文档里的版本与下载链接 ----
 const docTargets = ['README.md', 'README.en.md', 'docs/安装与迁移.md', 'docs/MIGRATION.en.md']
-const versionToken = () => /(?<![\w.-])v?1\.\d+\.\d+(?![\w.-])/gu
+// 版本号不能只认 1.x：升到 2.0.0 之后，写死主版本会让 README 与两份迁移文档停在
+// 旧主版本，而残留扫描用同一条正则也同样看不见，属静默错误。这里改成通用三段式
+// 匹配，再排除两类非插件版本：
+//   - 官方 CLI 版本（lib/cn/accounts.js 的 ACCOUNT_CLI_VERSIONS，也被账号说明文案引用）；
+//   - 依赖/引擎版本区间（匹配位置前面紧跟 ^ ~ > < = 的那些，如 ^4.0.5、>=22.19.0）。
+// 22.19.0 另有天然保护：候选起点前是数字，lookbehind 不成立。
+const UNRELATED_VERSIONS = new Set([
+  '2.174.0', '2.177.0', // ACCOUNT_CLI_VERSIONS：多账号隔离核查过的官方 CLI 版本
+  '0.2.0', '0.2.2' // model-catalog.js 的 ACP clientInfo 版本，不是插件版本
+])
+const anyVersion = () => /(?<![A-Za-z0-9_.-])v?[0-9]+[.][0-9]+[.][0-9]+(?![A-Za-z0-9_.-])/gu
+const isPluginVersion = (token) => !UNRELATED_VERSIONS.has(token.replace(/^v/u, ''))
+// 依赖/引擎区间（^4.0.5、>=22.19.0 之类）不是插件版本，判据是紧邻的运算符。
+const precededByComparator = (prefix) => /[~^><=]$/u.test(prefix.trimEnd())
 
 for (const file of docTargets) {
   let text
@@ -69,7 +82,19 @@ for (const file of docTargets) {
   } catch {
     continue
   }
-  const replaced = text.replace(versionToken(), (m) => (m.startsWith('v') ? `v${version}` : version))
+  // 只替换插件版本；CLI 版本、ACP 版本与依赖区间原样保留。
+  let replaced = ''
+  let cursor = 0
+  for (const found of text.matchAll(anyVersion())) {
+    const token = found[0]
+    if (!isPluginVersion(token)) continue
+    if (precededByComparator(text.slice(0, found.index))) continue
+    const next = token.startsWith('v') ? `v${version}` : version
+    if (next === token) continue
+    replaced += text.slice(cursor, found.index) + next
+    cursor = found.index + token.length
+  }
+  replaced += text.slice(cursor)
   if (replaced === text) continue
   if (checkOnly) {
     errors.push(`${file}: 仍包含非当前版本号（应为 ${version}）`)
@@ -123,11 +148,15 @@ for (const file of candidates) {
   }
   const lines = text.split('\n')
   for (let i = 0; i < lines.length; i += 1) {
-    const hits = lines[i].match(versionToken())
-    if (!hits) continue
-    for (const hit of hits) {
-      if (hit.replace(/^v/u, '') === version) continue
-      residual.push(`${path.relative(root, file)}:${i + 1}: ${hit}`)
+    const line = lines[i]
+    for (const found of line.matchAll(anyVersion())) {
+      const token = found[0]
+      const plain = token.replace(/^v/u, '')
+      if (plain === version) continue
+      if (UNRELATED_VERSIONS.has(plain)) continue
+      // 依赖/引擎版本（^4.0.5、>=22.19.0 之类）不是插件版本。
+      if (precededByComparator(line.slice(0, found.index))) continue
+      residual.push(`${path.relative(root, file)}:${i + 1}: ${token}`)
     }
   }
 }
