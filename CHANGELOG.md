@@ -1,5 +1,18 @@
 # 更新记录 / Changelog
 
+## 2.1.0 — 用量增强：今日调用、按模型消耗统计、最近调用与 CSV 导出
+
+- **今日调用（按日分桶）**：`lib/cn|intl/index.js` 的 `runtimeStatus` 新增 `today = { date, calls, inputTokens, outputTokens }`，由已有的 `recordCall()` 在同一点累加；跨天首次调用即重置为新一天（本地日期键 `YYYY-MM-DD`）。不新增存储格式、不发额外网络请求。
+- **按模型消耗统计**：新增 `perModel` 映射（每模型 `calls` / `inputTokens` / `outputTokens`），在 `usage` 里按「输入+输出」降序输出。**诚实取舍**：积分没有官方换算公式，硬用倍率相乘会造出假数字，所以界面只展示真实调用数、真实 token 与目录倍率，**不显示「估算积分」**。
+- **最近调用（环形缓冲 20 条）**：新增 `recentCalls`，只保留有界字段（时间、模型、状态、耗时、token、工具数、错误码），不保留任何回复正文；`usage.recentCalls` 直接暴露给页面。
+- **导出 CSV**：用量页新增「导出 CSV」按钮，在页面内用 `Blob` 生成（含表头、RFC 风格引号转义、按日期命名），**不新增服务端接口、不上传任何内容**；无调用记录时按钮禁用。
+- **账号最近使用**：新增进程内 `accountLastUsed` 映射，`accounts[].lastUsedAt` 随状态返回；账号行卡在用量摘要下显示「最近使用 {time}」。刻意**不写回磁盘的账号索引**，避免改动既有存储格式。
+- **界面**：用量区统计格由四格增为五格（本进程调用 / 今日调用 / 输入 tokens / 输出 tokens / 失败），新增「按模型消耗统计」表与「最近调用」列表（每行带状态 chip，错误行显示错误码）。
+- **词表**：新增 `todayCalls`、`perModelTitle`、`perModelEmpty`、`recentCallsTitle`、`exportCsv`、`lastUsed`、`colCalls` 七个键；同时删除被我放弃的 `perModelEstimate` 死键，不留悬空词条。
+- 测试：`test/cn|intl/model-visibility.test.js` 在既有 status 调用后追加断言——`usage.today.calls` 为数字、`usage.today.date` 初始为空串、`usage.perModel` 与 `usage.recentCalls` 初始为空数组。
+- **已知覆盖边界（如实说明）**：三个计数器自增只由 `recordCall()` 驱动，而它需要真实或伪造 CLI 的流式调用才能进入；本批断言的是「字段已暴露且形状正确」，计数累积尚未端到端覆盖。
+- 验证：生成块一致、四个改动文件 `node --check` 通过、162 个 `t()` 键中英齐备、35 个错误码处置指引齐全、12 个 Markdown 内部链接全部可达；回归 **270 通过 0 失败**。
+
 ## 2.0.0 — 设置页按设计稿重做视觉与交互（UI 重构里程碑）
 
 - **视觉语言整体重做**：按设计稿复刻顶栏（CB 方块标识 + 标题 + 副标题 + 版本胶囊 + 超时提示）、卡片化信息区、下划线式页签、iOS 风格开关、chip 状态徽标、170px 标签列字段行、深色日志框观感。新增 `Card` / `Field` / `Chip` / `Switch` 四个可复用组件，与一组设计令牌常量（`T_TEXT` / `T_MUTED` / `T_LINE` / `T_SOFT` / `T_BRAND` / `T_OK` / `T_WARN`）。

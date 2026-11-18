@@ -154,6 +154,11 @@ test('hiding a model filters listModels, keeps one visible model and updates the
 
   const status = await (await fetch(`${origin}/plugins/dsh-codebuddy-cli-intl/status`)).json()
   assert.deepEqual(status.modelPreferences, { hidden: ['future-alpha'], storageError: null })
+  // 2.1.0 usage aggregation is exposed on the same status payload.
+  assert.equal(typeof status.usage.today.calls, 'number')
+  assert.equal(status.usage.today.date, '')
+  assert.deepEqual(status.usage.perModel, [])
+  assert.deepEqual(status.usage.recentCalls, [])
 
   // The last visible model cannot be hidden.
   const last = await post({ action: 'setModelVisibility', id: 'new-free-model', enabled: false })
