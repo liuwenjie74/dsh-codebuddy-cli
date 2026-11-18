@@ -1,9 +1,9 @@
-# Install and migrate — 2.1.11
+# Install and migrate — 2.1.12
 
 1. Record each standalone plugin's CLI path, config directory, model, effort and deadline. Do not copy credentials.
-2. With no active task, disable both standalone bundles and the older dsh-codebuddy-cli 2.1.11 preview in DSH. Keep old packages and sign-in/account directories.
+2. With no active task, disable both standalone bundles and the older dsh-codebuddy-cli 2.1.12 preview in DSH. Keep old packages and sign-in/account directories.
 3. Install dsh-dkn-codebuddy-cli-1.1.0.tgz and follow DSH's normal reload/restart requirements.
-4. Open CodeBuddy in the sidebar. Check both regions show runtime 2.1.11 and restore recorded settings where necessary. Old module-name profile overrides may not migrate automatically.
+4. Open CodeBuddy in the sidebar. Check both regions show runtime 2.1.12 and restore recorded settings where necessary. Old module-name profile overrides may not migrate automatically.
 5. International retains ~/.dsh-codebuddy-cli-intl. China with a blank config directory uses the official default and no longer inherits CODEBUDDY_CONFIG_DIR; explicitly enter the previous directory if you depended on that variable.
 6. Existing regional account roots and model prefixes remain unchanged. Separate default config directories are not proof of credential isolation; use isolated-account environments when required.
 7. Test each provider in a new conversation before checking a harmless old conversation. Settings-page selection never reroutes a conversation.
