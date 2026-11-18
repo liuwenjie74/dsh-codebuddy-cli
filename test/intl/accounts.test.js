@@ -116,10 +116,13 @@ test('linked configuration directories cannot escape the account environment', a
   catch (error) { if (error.code === 'EPERM') { t.skip('symlink unavailable'); return }; throw error }
   await assert.rejects(store.selected({}), error => error.code === 'ACCOUNT_PATH_INVALID')
 })
-test('native executables and unrelated Node entrypoints cannot claim the verified account runtime', () => {
-  assert.throws(() => assertAccountInvocation({ command: 'C:\\bin\\codebuddy.exe', args: [] }), error => error.code === 'ACCOUNT_CLI_RUNTIME_UNVERIFIED')
+test('the official native executable and the npm entry are accepted while unrelated entrypoints are not', () => {
+  assert.equal(assertAccountInvocation({ command: 'C:\\bin\\codebuddy.exe', args: [] }), 'native')
+  assert.equal(assertAccountInvocation({ command: 'C:\\bin\\codebuddy-code.exe', args: [] }), 'native')
+  assert.equal(assertAccountInvocation({ command: 'C:\\bin\\node.exe', args: ['C:\\npm\\node_modules\\@tencent-ai\\codebuddy-code\\bin\\codebuddy'] }), 'npm')
   assert.throws(() => assertAccountInvocation({ command: 'C:\\bin\\node.exe', args: ['C:\\custom.js'] }), error => error.code === 'ACCOUNT_CLI_RUNTIME_UNVERIFIED')
-  assert.doesNotThrow(() => assertAccountInvocation({ command: 'C:\\bin\\node.exe', args: ['C:\\npm\\node_modules\\@tencent-ai\\codebuddy-code\\bin\\codebuddy'] }))
+  assert.throws(() => assertAccountInvocation({ command: 'C:\\bin\\other.exe', args: [] }), error => error.code === 'ACCOUNT_CLI_RUNTIME_UNVERIFIED')
+  assert.throws(() => assertAccountInvocation({ command: 'C:\\bin\\codebuddy.exe', args: ['--version'] }), error => error.code === 'ACCOUNT_CLI_RUNTIME_UNVERIFIED')
 })
 test('a missing index beside existing profiles cannot turn into default-account fallback, including after restart', async t => {
   const { directory, store } = await setup(t)

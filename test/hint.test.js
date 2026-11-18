@@ -14,7 +14,7 @@ const cn = await readFile(new URL('../lib/cn/index.js', import.meta.url), 'utf8'
 const intl = await readFile(new URL('../lib/intl/index.js', import.meta.url), 'utf8')
 
 const COLLAPSED = [
-  'intro', 'setupNote', 'cliCheckNote', 'accountNote', 'accountValidation', 'accountPrivacy',
+  'intro', 'setupNote', 'cliCheckNote', 'accountValidation', 'accountPrivacy',
   'accountGuideSteps', 'accountGuideErrors', 'modelNote', 'timeoutHelp',
   'rewriteClientNamesNote', 'captureRequestSamplesNote', 'catalogNote', 'imagesHelp',
   'usageNote', 'logsNote', 'regionNote', 'pageEntryHint',
@@ -24,7 +24,7 @@ const COLLAPSED = [
 
 // Explanations the user asked to keep in plain sight: they carry the capability
 // and billing caveats, which must be readable without opening anything.
-const ALWAYS_VISIBLE = ['saveFirst', 'feedbackReadOnly', 'accountUnsupported', 'toolNote', 'creditsNote']
+const ALWAYS_VISIBLE = ['saveFirst', 'feedbackReadOnly', 'accountUnsupported', 'toolNote', 'creditsNote', 'accountNote']
 
 const lines = client.split('\n')
 const rowsWith = (key) => lines.filter((line) => line.includes(`t('${key}')`))
