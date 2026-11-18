@@ -37,7 +37,11 @@ test('every account row renders its own details and actions',async t=>{
  const sandbox=vm.createContext({React,TextEncoder,TextDecoder,AbortController,setInterval:()=>1,clearInterval(){},clearTimeout(){},setTimeout:()=>1,navigator:{clipboard:{writeText:async()=>{}}},Blob,
   URL:{createObjectURL:()=> 'blob:fixture',revokeObjectURL(){}},document:{body:{appendChild(){}},getElementById:()=>null,querySelector:()=>null,createElement(){return{click(){},remove(){}}}},
   window:{__ModuleLoader__:{load(m){api=m.factory(()=>React)}}},
-  fetch:async()=>({ok:true,json:async()=>structuredClone(status)})
+  fetch:async(url,init)=>{
+   const body=init&&init.method==='POST'?JSON.parse(init.body||'{}'):null
+   if(body&&body.action==='quotaRefresh') return {ok:true,json:async()=>({ok:true,balance:{available:true,source:'cli',remain:2100,total:5508,used:3408,packages:[],updatedAt:1}})}
+   return {ok:true,json:async()=>structuredClone(status)}
+  }
  })
  vm.runInContext(await readFile(new URL('../lib/client.js',import.meta.url),'utf8'),sandbox)
  const ctx={effect:fn=>fn(),locale:{register:(ns,v)=>{dictionaries[ns]=v;return()=>{}},bind:ns=>key=>dictionaries[ns].zh[key]},configForms:{get:()=>form,whileServed:(ns,fn)=>fn()},layout:{selectPanel(){},panelInfo:{getSnapshot:()=>({activePanelId:null})}},slots:{inject:(name,fn)=>fn(),register(options,component){registrations.push(options);if(options.name==='main'){page=component;props=options.inject()}return()=>{}}}}
@@ -79,4 +83,11 @@ test('every account row renders its own details and actions',async t=>{
  await click(rowButtons().find(node=>labelOf(node)==='取消移出'))
  assert.ok(!rowButtons().some(node=>labelOf(node)==='确认移出（保留本地登录数据）'),'and can be backed out of')
  assert.ok(!JSON.stringify(tree.toJSON()).includes('NaN'),'no figure may render as NaN')
+
+ // A refresh that returns the same numbers still has to show it ran.
+ const refresh=rowButtons().filter(node=>labelOf(node)==='刷新额度')[0]
+ assert.equal(refresh.props.disabled,false,'refresh stays available even before anything is read')
+ await click(refresh)
+ assert.ok(rowText().includes('已于'),'the row reports when it refreshed')
+ assert.ok(rowText().includes('剩余 2100 分'),'and shows the numbers it just read')
 })

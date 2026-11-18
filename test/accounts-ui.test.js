@@ -136,3 +136,19 @@ test('a signed-in row keeps only its identity, its usage and its packages', () =
   assert.equal(rows.includes('lastUsedLine('), false, 'rows no longer carry a last-used line')
   assert.ok(rows.includes("creditPackages('legacy', 'start')"), 'the everyday login row carries its breakdown too')
 })
+
+test('an added account is laid out exactly like the default sign-in row', () => {
+  const rows = client.slice(at('const otherRows = []'), at('const quotaAsked = React.useRef(null)'))
+  const legacy = rows.slice(0, rows.indexOf('for (const account of accountRows)'))
+  const added = rows.slice(rows.indexOf('for (const account of accountRows)'))
+  for (const [name, slice] of [['default', legacy], ['added', added]]) {
+    assert.ok(slice.includes('...ACCT.row'), `the ${name} row must use the shared row spacing`)
+    assert.ok(slice.includes("quotaNoteLine("), `the ${name} row must report its own refresh outcome`)
+  }
+  assert.ok(!added.includes("padding: '10px 14px'"), 'an added row must not carry its own padding')
+  // Refresh is the repair path when nothing has been read yet, so it is never
+  // disabled by the absence of a balance -- only by a call already in flight.
+  assert.ok(!added.includes('balances[account.id]?.available !== true'), 'refresh must not wait for a balance to exist')
+  assert.ok(added.includes("quotaBusyKey === account.id ? t('quotaRefreshing') : t('quotaRefresh')"), 'a refresh in flight must say so')
+  assert.ok(zh.quotaRefreshing && zh.quotaRefreshedAt, 'the refresh outcome needs words in both languages')
+})

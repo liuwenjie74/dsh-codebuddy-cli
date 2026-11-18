@@ -286,6 +286,8 @@
   "quotaLoading": "正在读取额度…",
   "quotaUnavailable": "额度暂时读取不到，请稍后重试或去官网查看。",
   "quotaFailed": "额度读取失败，请重试或去官网查看。",
+  "quotaRefreshing": "刷新中…",
+  "quotaRefreshedAt": "已于 {time} 刷新。",
   "quotaEmpty": "账号下没有可用的资源包。",
   "networkFacts": "网络：代理 {proxy} · 自定义 CA {ca} · Node {node}",
   "networkHint": "这里只显示当前进程实际生效的值，插件不保存也不修改它们。代理来自 HTTPS_PROXY（或 https_proxy / HTTP_PROXY / ALL_PROXY）；Node 24 起内置 fetch 还需 NODE_USE_ENV_PROXY=1 才会走代理，否则该值存在但请求仍直连。自定义 CA 来自 NODE_EXTRA_CA_CERTS，必须指向 PEM 文件且在启动 DSH 之前设置。显示「未知」表示没有配置，出站请求将直连——这是企业网或抓包环境下请求失败的常见原因。"
