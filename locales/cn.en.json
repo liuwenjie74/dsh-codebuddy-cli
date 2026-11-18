@@ -165,7 +165,7 @@
   "preflightFailed": "Pre-save check failed: {item} ({code}). Fix it and save again.",
   "filterModels": "Filter",
   "batchSaved": "Saved the enabled state for {count} models.",
-  "modelsSelectionStatus": "{total} models · {selected} selected · {hidden} disabled",
+  "modelsSelectionStatus": "{total} models · {selected} selected · {hidden} disabled · updated {time}",
   "rewriteTitle": "Cover identity",
   "rewriteClientNames": "Cover identity",
   "rewriteClientNamesToggle": "Apply: rewrite client self-names in the system prompt to WorkBuddy",

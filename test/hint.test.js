@@ -51,7 +51,11 @@ test('no explanation glyph is left alone on its own line', () => {
     }
   }
   // Section-level notes are handed to the heading row itself.
-  assert.ok(client.includes('function SectionHeading({ kind, children, hint })'))
+  // Section-level notes ride on the heading row; the heading also owns an
+  // `actions` slot so row controls (e.g. refresh) live on that same line instead
+  // of a separate toolbar row.
+  assert.ok(client.includes('function SectionHeading({ kind, children, hint, actions })'))
+  assert.ok(client.includes("style: { marginLeft: 'auto'"), 'heading actions must be right-aligned on the row')
 })
 
 test('explanations with billing and capability caveats stay visible', () => {

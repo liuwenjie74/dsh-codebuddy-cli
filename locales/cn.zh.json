@@ -165,7 +165,7 @@
   "preflightFailed": "保存前检查未通过：{item}（{code}）。请修正后再保存。",
   "filterModels": "筛选",
   "batchSaved": "已保存 {count} 个模型的启用状态。",
-  "modelsSelectionStatus": "共 {total} 个模型 · 已选 {selected} 个 · 已停用 {hidden} 个",
+  "modelsSelectionStatus": "共 {total} 个模型 · 已选 {selected} 个 · 已停用 {hidden} 个 · 更新于 {time}",
   "rewriteTitle": "覆盖标识",
   "rewriteClientNames": "覆盖标识",
   "rewriteClientNamesToggle": "启用：把系统提示里的客户端自称统一改为 WorkBuddy",
