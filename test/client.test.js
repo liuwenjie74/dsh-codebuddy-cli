@@ -46,10 +46,13 @@ test('one UI keeps regional drafts, actions, consent, log exports and diagnostic
  await act(async()=>button('cn','保存设置').props.onClick())
  assert.equal(forms.cn.getSnapshot().value.model,'cn-only-draft');assert.equal(forms.intl.getSnapshot().value.model,'')
  await switchRegion('国际版')
- const label=region('intl').findAllByType('input').find(n=>n.props['aria-label']==='账号备注')
- await act(async()=>label.props.onChange({target:{value:'intl-only'}}))
- await act(async()=>button('intl','新增独立账号').props.onClick())
- assert.equal(calls.findLast(c=>c.body?.action==='add').url,'/plugins/dsh-codebuddy-cli-intl/accounts');assert.equal(statuses.cn.accounts.accounts.length,0)
+ // One click adds the account and asks for the official sign-in command; the
+ // label is generated, never typed.
+ await act(async()=>button('intl','新增账号').props.onClick())
+ const addCall=calls.findLast(c=>c.body?.action==='add')
+ assert.equal(addCall.url,'/plugins/dsh-codebuddy-cli-intl/accounts');assert.equal(addCall.body.label,'账号 1')
+ assert.equal(calls.findLast(c=>c.body?.action==='prepareLogin').body.id,'synthetic-intl')
+ assert.equal(statuses.cn.accounts.accounts.length,0)
  statuses.intl.usage.lastCall={state:'error',errorCode:'CLI_TIMEOUT',processDiagnostics:{streamReason:'deadline',streamPhase:'after-init',parseStage:'none',frameIndex:2,frameCount:4,frameBytes:20,initCount:1,resultCount:0,lastFrameClass:'assistant',terminationInitiator:'deadline',closeObserved:false,deadlineReached:true},responseDiagnostics:{hasStructuredOutput:false,structuredOutputType:'missing',resultTypeValid:true,finalSubtypeClass:'missing',noticeClass:'network',noticeSource:'stderr'}}
  await act(async()=>button('intl','刷新模型与倍率').props.onClick())
  const text=JSON.stringify(tree.toJSON())

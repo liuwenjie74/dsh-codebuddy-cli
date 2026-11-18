@@ -16,7 +16,7 @@ const intl = await readFile(new URL('../lib/intl/index.js', import.meta.url), 'u
 const COLLAPSED = [
   'intro', 'setupNote', 'cliCheckNote', 'accountValidation', 'accountPrivacy',
   'accountGuideSteps', 'accountGuideErrors', 'modelNote', 'timeoutHelp',
-  'rewriteClientNamesNote', 'captureRequestSamplesNote', 'catalogNote', 'imagesHelp',
+  'rewriteClientNamesNote', 'captureRequestSamplesNote', 'imagesHelp',
   'usageNote', 'logsNote', 'regionNote', 'pageEntryHint',
   'feedbackIntro', 'feedbackRequired', 'feedbackScreenshotNote', 'feedbackPrivacy',
   'feedbackAttachmentNote', 'feedbackDetailNote', 'feedbackLogToolsNote', 'feedbackLocalNote'

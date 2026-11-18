@@ -86,3 +86,35 @@ test('the credits wording follows the renamed section', () => {
   assert.equal(zh.quotaUnit, '分')
   assert.ok(!('balance' in zh), 'the standalone credits block is gone')
 })
+
+test('adding an account is one click and never asks for a name', () => {
+  const start = at("id: 'cb-account-add'")
+  const card = client.slice(start, at("id: 'cb-account-rotation'", start))
+  assert.equal(card.includes("t('accountLabel')"), false, 'the label input is gone from the add card')
+  assert.equal(card.includes("t('accountLegacy')"), false, 'the dead default-login button is gone')
+  assert.ok(card.includes('onClick: addAccount'), 'one button starts the whole flow')
+  assert.ok(card.includes('addCommand'), 'the generated command appears in the card itself')
+  assert.ok(card.includes("t('accountLoginDone')"), 'the card offers the signed-in confirmation')
+  assert.ok(card.includes("t('accountLoginCancel')"), 'the card can be dismissed')
+
+  const flow = client.slice(at('const addAccount = async () => {'), at('const confirmAccountLogin = async () => {'))
+  assert.ok(flow.includes("translate(t, 'accountAutoLabel'"), 'the placeholder name is generated')
+  assert.ok(flow.includes("postAccounts({ action: 'add', label })"), 'adding uses that placeholder')
+  assert.ok(flow.includes("postAccounts({ action: 'prepareLogin'"), 'the sign-in command is generated in the same click')
+})
+
+test('the other-accounts card only exists when it has rows', () => {
+  const list = at("otherRows.length ? h('div', { id: 'cb-account-list'")
+  assert.ok(list > 0, 'the list card must be conditional')
+  assert.equal(client.includes("t('accountOtherEmpty')"), false, 'an empty list no longer renders a placeholder')
+  const rows = client.slice(at('const otherRows = []'), list)
+  assert.ok(rows.includes('if (addStep && pendingAdd === account.id) continue'), 'the account being added is not listed twice')
+})
+
+test('a row is named by the official record, not by the stored placeholder', () => {
+  assert.ok(client.includes('account.identity?.nickname || account.label'), 'rows prefer the CLI nickname')
+  assert.ok(client.includes('currentAccount.identity?.nickname || currentAccount.label'), 'the current card prefers it too')
+  const cancel = client.slice(at('const cancelAdd = async () => {'), at('// One figure of the credit panel'))
+  assert.ok(cancel.includes('credentialsPresent'), 'cancelling keeps an account that already signed in')
+  assert.ok(cancel.includes("action: 'remove'"), 'cancelling discards an unsigned placeholder')
+})
