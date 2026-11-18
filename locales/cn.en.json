@@ -243,5 +243,20 @@
   "autoSyncCatalogNote": "When on, a catalog snapshot older than its cache window is refreshed once in the background; when off, the catalog only updates after you press Refresh models. The switch takes effect immediately and is stored in the DSH configuration.",
   "imageBase64": "Inline images as Base64",
   "imageBase64Toggle": "When off, requests with images fall back to the offload hint",
-  "imageBase64Note": "When on, image attachments are inlined into the request as Base64. When off, nothing is inlined and a request that carries images reports an offload requirement instead, so an oversized body is never built silently. The switch takes effect immediately and is stored in the DSH configuration."
+  "imageBase64Note": "When on, image attachments are inlined into the request as Base64. When off, nothing is inlined and a request that carries images reports an offload requirement instead, so an oversized body is never built silently. The switch takes effect immediately and is stored in the DSH configuration.",
+  "quotaRemain": "Credits remaining",
+  "quotaTotal": "Total credits",
+  "quotaUsed": "Credits used",
+  "quotaExpire": "Expires {time}",
+  "quotaPackages": "Package breakdown ({count} merged groups)",
+  "quotaRefresh": "Refresh quota",
+  "quotaAuthorize": "Authorise quota access",
+  "quotaAuthorizeHint": "Open the generated link in your browser and confirm; then come back and press \"I have authorised\".",
+  "quotaCompleteAuth": "I have authorised",
+  "quotaDisconnect": "Disconnect",
+  "quotaDisconnected": "Authorisation removed and the stored credential deleted.",
+  "quotaNotAuthorized": "Quota access is not authorised. Credits belong to the official account: authorise to read them here, or check the official site.",
+  "quotaUnavailable": "Quota is temporarily unavailable. Retry later or check the official site.",
+  "quotaFailed": "Reading quota failed. Retry or check the official site.",
+  "quotaEmpty": "This account has no usable packages."
 }

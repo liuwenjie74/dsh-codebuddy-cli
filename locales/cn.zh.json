@@ -243,5 +243,20 @@
   "autoSyncCatalogNote": "开启后，模型目录快照超过缓存时间会在后台自动刷新一次；关闭后只有手动点「刷新模型与倍率」才会更新。切换即时生效，保存在 DSH 配置里。",
   "imageBase64": "图片自动转 Base64",
   "imageBase64Toggle": "关闭后带图请求改走离线通道提示",
-  "imageBase64Note": "开启后图片附件会内联进请求（Base64）。关闭后不再内联，带图请求会以「图片需走离线通道」提示，避免把图片塞进过大的请求体。切换即时生效，保存在 DSH 配置里。"
+  "imageBase64Note": "开启后图片附件会内联进请求（Base64）。关闭后不再内联，带图请求会以「图片需走离线通道」提示，避免把图片塞进过大的请求体。切换即时生效，保存在 DSH 配置里。",
+  "quotaRemain": "剩余积分",
+  "quotaTotal": "总额度",
+  "quotaUsed": "已用积分",
+  "quotaExpire": "到期 {time}",
+  "quotaPackages": "资源包明细（同名已合并，共 {count} 类）",
+  "quotaRefresh": "刷新额度",
+  "quotaAuthorize": "授权读取额度",
+  "quotaAuthorizeHint": "已生成授权链接，请复制到浏览器打开并确认授权；完成后回来点「我已完成授权」。",
+  "quotaCompleteAuth": "我已完成授权",
+  "quotaDisconnect": "断开授权",
+  "quotaDisconnected": "已断开授权，本地保存的凭据已删除。",
+  "quotaNotAuthorized": "尚未授权读取额度。额度由官方账号决定，可授权后直接读取，或去官网查看。",
+  "quotaUnavailable": "额度暂时读取不到，请稍后重试或去官网查看。",
+  "quotaFailed": "额度读取失败，请重试或去官网查看。",
+  "quotaEmpty": "账号下没有可用的资源包。"
 }

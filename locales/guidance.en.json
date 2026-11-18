@@ -42,5 +42,17 @@
   "fix_PREFLIGHT_CONFIG_DIR": "The config directory must be an existing, writable folder. Fix the path, then save again.",
   "fix_CLI_ERROR": "The CLI call failed. Check sign-in and CLI configuration, then retry.",
   "fix_CLI_AUTH_REQUIRED": "Authentication is required. Complete the CLI sign-in, then retry.",
-  "fix_CLI_LOGIN_REQUIRED": "Sign-in is required. Follow the login guide to complete the CLI sign-in."
+  "fix_CLI_LOGIN_REQUIRED": "Sign-in is required. Follow the login guide to complete the CLI sign-in.",
+  "fix_QUOTA_NETWORK": "The network request failed. Check connectivity and any proxy, then retry, or read the quota on the official site.",
+  "fix_QUOTA_AUTH_UNAVAILABLE": "Quota authorisation could not be started. Retry shortly; if it keeps failing, check the network or read the quota on the official site.",
+  "fix_QUOTA_STATE_MISSING": "The authorisation expired or was never started. Press Authorise quota access again and confirm the new link in your browser.",
+  "fix_QUOTA_PENDING": "Authorisation is not finished in the browser yet. Open the link, confirm it, then press \"I have authorised\".",
+  "fix_QUOTA_TOKEN_FAILED": "Exchanging the authorisation for a token failed. Start the authorisation again, or read the quota on the official site.",
+  "fix_QUOTA_ACCOUNT_FAILED": "Reading the account identity failed. Start the authorisation again and retry.",
+  "fix_QUOTA_BILLING_UNAVAILABLE": "Quota is temporarily unavailable. Retry later or read it on the official site.",
+  "fix_QUOTA_BILLING_FAILED": "The quota read was rejected. Authorise again and retry; if it keeps failing, read the quota on the official site.",
+  "fix_QUOTA_NOT_AUTHORIZED": "Quota access is not authorised. Press Authorise quota access to confirm once in your browser, or read the quota on the official site.",
+  "fix_QUOTA_REFRESH_REJECTED": "The authorisation is no longer valid and the stored credential was removed. Authorise again.",
+  "fix_QUOTA_REFRESH_FAILED": "Refreshing the credential failed. Retry; if it keeps failing, authorise again.",
+  "fix_QUOTA_ACTION_UNKNOWN": "This quota action is not supported by the installed plugin. Update the plugin and retry."
 }

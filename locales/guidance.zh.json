@@ -42,5 +42,17 @@
   "fix_PREFLIGHT_CONFIG_DIR": "配置目录必须是已存在且可写的文件夹。请修正路径后再保存。",
   "fix_CLI_ERROR": "CLI 调用失败。请检查登录状态与 CLI 配置后重试。",
   "fix_CLI_AUTH_REQUIRED": "需要认证。请完成 CLI 登录后重试。",
-  "fix_CLI_LOGIN_REQUIRED": "需要登录。请点击登录指引完成 CLI 登录。"
+  "fix_CLI_LOGIN_REQUIRED": "需要登录。请点击登录指引完成 CLI 登录。",
+  "fix_QUOTA_NETWORK": "网络请求失败。请检查网络与代理后重试，或直接去官网查看额度。",
+  "fix_QUOTA_AUTH_UNAVAILABLE": "无法发起额度授权。请稍后重试；持续失败请检查网络，或去官网查看额度。",
+  "fix_QUOTA_STATE_MISSING": "授权已过期或尚未发起。请重新点击「授权读取额度」，用新链接在浏览器确认。",
+  "fix_QUOTA_PENDING": "尚未在浏览器完成授权。请打开链接确认授权，再回来点「我已完成授权」。",
+  "fix_QUOTA_TOKEN_FAILED": "换取凭据失败。请重新发起授权；持续失败请去官网查看额度。",
+  "fix_QUOTA_ACCOUNT_FAILED": "读取账号信息失败。请重新发起授权后重试。",
+  "fix_QUOTA_BILLING_UNAVAILABLE": "暂时读不到额度。请稍后重试，或去官网查看。",
+  "fix_QUOTA_BILLING_FAILED": "额度读取被拒绝。请重新授权后重试；持续失败请去官网查看。",
+  "fix_QUOTA_NOT_AUTHORIZED": "尚未授权读取额度。请点击「授权读取额度」完成一次浏览器授权，或直接去官网查看。",
+  "fix_QUOTA_REFRESH_REJECTED": "授权已失效，本地保存的凭据已自动清除。请重新授权。",
+  "fix_QUOTA_REFRESH_FAILED": "刷新凭据失败。请重试；持续失败请重新发起授权。",
+  "fix_QUOTA_ACTION_UNKNOWN": "插件不支持该额度操作。请更新插件到最新版后重试。"
 }
