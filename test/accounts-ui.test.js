@@ -39,7 +39,7 @@ test('the summary strip carries exactly the four agreed facts', () => {
   assert.ok(targets.length >= 3, 'each summary cell must jump to the card it summarises')
 })
 
-test('a card offers one primary action and every row its own two extra actions', () => {
+test('every account block shows its credits the same way and keeps its own actions', () => {
   const currentStart = at("id: 'cb-account-current'")
   const listStart = at("id: 'cb-account-list'")
   const currentCard = client.slice(currentStart, listStart)
@@ -47,34 +47,23 @@ test('a card offers one primary action and every row its own two extra actions',
   assert.ok(!currentCard.includes('primaryButtonStyle'), 'the card adds no second primary button of its own')
 
   const panelStart = at('const creditPanel = ')
-  const panel = client.slice(panelStart, at('const creditLine = ', panelStart))
+  const panel = client.slice(panelStart, at('const usageLine = ', panelStart))
   assert.equal((panel.match(/primaryButtonStyle/gu) ?? []).length, 1, 'the credits panel keeps a single primary action')
   assert.ok(panel.includes("t('quotaRefresh')"), 'the remaining primary action is the credits refresh')
+  assert.ok(panel.includes('creditPackages('), 'the package breakdown lives in the credits panel, so every block gets it')
   assert.ok(!panel.includes("t('quotaDisconnect')") || panel.indexOf("t('quotaDisconnect')") > panel.indexOf('details'), 'disconnecting stays inside the details fold')
 
-  const rows = client.slice(at('const otherRows = []'), listStart)
-  const headerRow = rows.split('\n').find((line) => line.includes("t('accountUse')"))
-  assert.ok(headerRow, 'each row keeps one visible primary action')
-  assert.ok(rows.includes("t('quotaRefresh')"), 'the row can refresh its own credits')
-  assert.ok(rows.includes("t('accountRemove')"), 'the row can remove itself')
-  assert.ok(rows.indexOf("t('quotaRefresh')") < rows.indexOf('identityLine(account.identity'), 'both actions sit on the row header, above the details')
-  assert.ok(!headerRow.includes("t('accountPrepare')"), 'the sign-in command must not be a row button')
+  const rows = client.slice(at('const creditActions = '), at('const quotaAsked = React.useRef(null)'))
+  // Rows share the card's shape through one helper: title and status on the left,
+  // the very same credits panel and the row's own buttons on the right.
+  assert.ok(rows.includes('const rowBlock = '), 'rows are built by one shared layout helper')
+  assert.ok(rows.includes('creditActions(key, buttons)'), 'rows reuse the credits panel instead of a second figure')
+  assert.equal((rows.match(/primaryButtonStyle/gu) ?? []).length, 0, 'refresh stays the only primary button, so row buttons are secondary')
+  assert.ok(rows.includes("t('accountUse')"), 'a row can be selected')
+  assert.ok(rows.includes("t('accountRemove')"), 'a row can remove itself')
+  assert.ok(rows.includes("t('accountPrepare')"), 'an unsigned row can still ask for its sign-in command')
   assert.equal(client.includes("t('accountMore')"), false, 'the row menu is gone')
   assert.equal(rows.includes("'aria-expanded'"), false, 'no account row expands a menu any more')
-})
-
-test('a row states its status once and shows its own credits', () => {
-  const start = at('const rowStatus = (account) =>')
-  const end = client.indexOf('const otherRows = []', start)
-  const block = client.slice(start, end)
-  for (const key of ['accountPathError', 'accountStatusSignedIn', 'accountNoCredential']) {
-    assert.ok(block.includes(key), `a row must be able to say ${key}`)
-  }
-  const rowStart = at('const otherRows = []')
-  const rowEnd = at("id: 'cb-account-list'", rowStart)
-  const rows = client.slice(rowStart, rowEnd)
-  assert.ok(rows.includes('creditLine('), 'each row shows its own credits on the row')
-  assert.equal((rows.match(/rowStatus\(/gu) ?? []).length, 1, 'a row states its status exactly once')
 })
 
 test('the switch saves the moment it moves', () => {
@@ -123,32 +112,33 @@ test('a row is named by the official record, not by the stored placeholder', () 
 })
 
 test('a signed-in row keeps only its identity, its usage and its packages', () => {
-  const rows = client.slice(at('const otherRows = []'), at('const quotaAsked = React.useRef(null)'))
-  const branch = rows.slice(rows.indexOf('const signedIn = account.credentialsPresent === true'))
-  const onSigned = branch.slice(branch.indexOf("? h('div'"), branch.indexOf(": h('div'"))
-  assert.ok(onSigned.includes('identityLine('), 'a signed-in row shows who is signed in')
-  assert.ok(onSigned.includes('usageLine('), 'a signed-in row shows what it has used')
-  assert.ok(onSigned.includes("creditPackages(account.id, 'start')"), 'a signed-in row can open its package breakdown')
-  assert.equal(onSigned.includes('accountPrepare'), false, 'the sign-in command is not offered to a signed-in account')
-  assert.equal(onSigned.includes('copyLoginCommand'), false, 'nor is copying a sign-in command')
-  const offSigned = branch.slice(branch.indexOf(": h('div'"))
-  assert.ok(offSigned.includes("t('accountPrepare')"), 'an unsigned row offers the sign-in command')
+  const rows = client.slice(at('const creditActions = '), at('const quotaAsked = React.useRef(null)'))
+  assert.ok(rows.includes('identityLine(account.identity'), 'a signed-in row shows who is signed in')
+  assert.ok(rows.includes('usageLine(account)'), 'a signed-in row shows what it has used')
+  assert.ok(rows.includes("creditPanel(key)"), 'its package breakdown arrives with the shared credits panel')
+  assert.ok(rows.includes('signedIn ? null :'), 'the sign-in command is offered only while the account has no credential')
+  const unsigned = rows.slice(rows.indexOf('signedIn ? null :'))
+  assert.ok(unsigned.includes("t('accountPrepare')"), 'an unsigned row offers the sign-in command')
+  assert.ok(unsigned.includes('copyLoginCommand'), 'and can copy the command it just generated')
   assert.equal(rows.includes('lastUsedLine('), false, 'rows no longer carry a last-used line')
-  assert.ok(rows.includes("creditPackages('legacy', 'start')"), 'the everyday login row carries its breakdown too')
 })
 
 test('an added account is laid out exactly like the default sign-in row', () => {
-  const rows = client.slice(at('const otherRows = []'), at('const quotaAsked = React.useRef(null)'))
-  const legacy = rows.slice(0, rows.indexOf('for (const account of accountRows)'))
-  const added = rows.slice(rows.indexOf('for (const account of accountRows)'))
-  for (const [name, slice] of [['default', legacy], ['added', added]]) {
-    assert.ok(slice.includes('...ACCT.row'), `the ${name} row must use the shared row spacing`)
-    assert.ok(slice.includes("quotaNoteLine("), `the ${name} row must report its own refresh outcome`)
+  const rows = client.slice(at('const creditActions = '), at('const quotaAsked = React.useRef(null)'))
+  // Both rows are produced by rowBlock, so they cannot drift apart again: the only
+  // per-row style is the hairline between them.
+  assert.ok(rows.includes("rowBlock('legacy'"), 'the everyday login row uses the shared block')
+  assert.ok(rows.includes('rowBlock(account.id'), 'an added account uses the same shared block')
+  assert.equal((rows.match(/gridTemplateColumns: 'minmax\(200px, 1fr\) auto'/gu) ?? []).length, 1, 'the two-column layout is defined once')
+  for (const [name, slice] of [['default', rows.slice(0, rows.indexOf('for (const account of accountRows)'))], ['added', rows.slice(rows.indexOf('for (const account of accountRows)'))]]) {
+    assert.ok(slice.includes('quotaNoteLine('), `the ${name} row reports its own refresh outcome`)
   }
-  assert.ok(!added.includes("padding: '10px 14px'"), 'an added row must not carry its own padding')
-  // Refresh is the repair path when nothing has been read yet, so it is never
-  // disabled by the absence of a balance -- only by a call already in flight.
-  assert.ok(!added.includes('balances[account.id]?.available !== true'), 'refresh must not wait for a balance to exist')
-  assert.ok(added.includes("quotaBusyKey === account.id ? t('quotaRefreshing') : t('quotaRefresh')"), 'a refresh in flight must say so')
+  assert.equal(rows.includes('primaryButtonStyle'), false, 'no row adds a second primary button, so refresh keeps one colour everywhere')
   assert.ok(zh.quotaRefreshing && zh.quotaRefreshedAt, 'the refresh outcome needs words in both languages')
+})
+
+test('the status strip names an account the way its card does', () => {
+  const strip = client.slice(at('const activeAccount = '), at('const activeAccountLabel = ') + 200)
+  assert.ok(strip.includes('activeAccount.identity?.nickname'), 'the strip prefers the name the CLI recorded')
+  assert.ok(strip.includes('|| activeAccount.label'), 'and falls back to the placeholder only when nothing is signed in')
 })

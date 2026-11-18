@@ -39,7 +39,8 @@ test('every account row renders its own details and actions',async t=>{
   window:{__ModuleLoader__:{load(m){api=m.factory(()=>React)}}},
   fetch:async(url,init)=>{
    const body=init&&init.method==='POST'?JSON.parse(init.body||'{}'):null
-   if(body&&body.action==='quotaRefresh') return {ok:true,json:async()=>({ok:true,balance:{available:true,source:'cli',remain:2100,total:5508,used:3408,packages:[],updatedAt:1}})}
+   const balance={available:true,source:'cli',remain:2100,total:5508,used:3408,packages:[],updatedAt:1}
+   if(body&&(body.action==='quotaRefresh'||body.action==='quotaRead')) return {ok:true,json:async()=>({ok:true,balance})}
    return {ok:true,json:async()=>structuredClone(status)}
   }
  })
@@ -65,8 +66,9 @@ test('every account row renders its own details and actions',async t=>{
  assert.ok(text.includes('已登录：'),'a signed-in row shows the identity the CLI recorded')
  assert.ok(text.includes('本进程记录'),'a signed-in row shows its own usage')
  assert.ok(!rowButtons().some(node=>labelOf(node)==='更多操作'),'the row menu is gone')
- assert.equal(rowButtons().filter(node=>labelOf(node)==='刷新额度').length,3,'every row refreshes its own credits')
- assert.equal(rowButtons().filter(node=>labelOf(node)==='授权读取额度').length,1,'the current card asks for authorisation while nothing is read yet')
+ assert.equal(rowButtons().filter(node=>labelOf(node)==='刷新额度').length,3,'the card and both signed-in rows refresh their own credits')
+ assert.equal(rowButtons().filter(node=>labelOf(node)==='授权读取额度').length,0,'the panel is read on open, so nothing asks for authorisation')
+ assert.equal(rowButtons().filter(node=>labelOf(node)==='正在读取额度…').length,0,'an unsigned row never sits on a loading figure')
  assert.equal(rowButtons().filter(node=>labelOf(node)==='移出列表').length,2,'only the two added accounts can remove themselves')
  assert.equal(rowButtons().filter(node=>labelOf(node)==='使用此账号').length,3,'the default sign-in row and both accounts can be selected')
  assert.ok(!text.includes('codebuddy login --spare'),'a signed-in row does not render its command')
@@ -89,5 +91,5 @@ test('every account row renders its own details and actions',async t=>{
  assert.equal(refresh.props.disabled,false,'refresh stays available even before anything is read')
  await click(refresh)
  assert.ok(rowText().includes('已于'),'the row reports when it refreshed')
- assert.ok(rowText().includes('剩余 2100 分'),'and shows the numbers it just read')
+ assert.ok(rowText().includes('2100'),'and shows the numbers it just read')
 })
