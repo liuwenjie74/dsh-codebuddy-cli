@@ -6,11 +6,11 @@ import React from 'react'
 import renderer,{act} from 'react-test-renderer'
 import { PLUGIN_VERSION } from '../lib/shared/version.js'
 
-// The accounts page renders two states per row: the collapsed line and the menu
-// opened behind "更多操作". Only the collapsed one used to be exercised, so an
-// ordering mistake inside the open branch shipped as a black page. This test opens
-// every menu it finds, which is the state the user actually clicked.
-test('opening the account menu renders the row details instead of throwing',async t=>{
+// The accounts page used to hide a row's details behind a "更多操作" menu, and only
+// the collapsed line was ever exercised -- so an ordering mistake inside the opened
+// branch shipped as a black page. The menu is gone, but the lesson stands: this test
+// renders the real page and drives the row controls the user actually clicks.
+test('every account row renders its own details and actions',async t=>{
  let api,page,props;const dictionaries={},registrations=[]
  const snapshot={status:'ready',writable:true,revision:1,value:{cliPath:'',configDir:'cn-profile',model:'',effort:'',timeoutMs:180000}}
  const listeners=new Set()
@@ -28,7 +28,8 @@ test('opening the account menu renders the row details instead of throwing',asyn
    defaultLogin:identity,
    accounts:[
     {id:'a1',label:'工作',credentialsPresent:true,identity,identityCode:'',usage:{calls:1,inputTokens:4,outputTokens:2},lastUsedAt:1797400000000,loginCommand:'codebuddy login --work'},
-    {id:'a2',label:'备用',credentialsPresent:true,identity,identityCode:'',usage:{calls:1,inputTokens:4,outputTokens:2},lastUsedAt:1797400000000,loginCommand:'codebuddy login --spare'}
+    {id:'a2',label:'备用',credentialsPresent:true,identity,identityCode:'',usage:{calls:1,inputTokens:4,outputTokens:2},lastUsedAt:1797400000000,loginCommand:'codebuddy login --spare'},
+    {id:'a3',label:'未登录',credentialsPresent:false,identity:{present:false},identityCode:'CLI_CREDENTIAL_MISSING',usage:{calls:0,inputTokens:0,outputTokens:0},loginCommand:'codebuddy login --fresh'}
    ]
   },
   logs:{entries:1,failures:0,samples:0,captureArmed:false}
@@ -44,6 +45,10 @@ test('opening the account menu renders the row details instead of throwing',asyn
  let tree;await act(async()=>{tree=renderer.create(React.createElement(page,props))});t.after(()=>act(()=>tree.unmount()))
 
  const buttons=()=>tree.root.findAllByType('button')
+ // Both region pages mount; only one is visible, so row assertions read that one.
+ const panel=()=>tree.root.findAll(node=>node.props&&node.props['data-settings-group']==='accounts'&&!node.props.hidden)[0]
+ const rowButtons=()=>panel().findAllByType('button')
+ const rowText=()=>JSON.stringify(panel().findAll(()=>true).flatMap(node=>node.children||[]).filter(child=>typeof child==='string'))
  const labelOf=node=>node.children.filter(child=>typeof child==='string').join('')
  const click=async node=>{await act(async()=>node.props.onClick())}
 
@@ -51,14 +56,27 @@ test('opening the account menu renders the row details instead of throwing',asyn
  assert.ok(accountsTab,'the accounts tab must be reachable')
  await click(accountsTab)
 
- const menu=buttons().find(node=>labelOf(node)==='更多操作')
- assert.ok(menu,'a non-current account keeps its actions behind one menu button')
- assert.ok(!buttons().some(node=>labelOf(node)==='移出列表'),'the menu starts collapsed')
+ // A signed-in account states who it is and what it used, with no sign-in command.
+ const text=rowText()
+ assert.ok(text.includes('已登录：'),'a signed-in row shows the identity the CLI recorded')
+ assert.ok(text.includes('本进程记录'),'a signed-in row shows its own usage')
+ assert.ok(!rowButtons().some(node=>labelOf(node)==='更多操作'),'the row menu is gone')
+ assert.equal(rowButtons().filter(node=>labelOf(node)==='刷新额度').length,3,'every row refreshes its own credits')
+ assert.equal(rowButtons().filter(node=>labelOf(node)==='授权读取额度').length,1,'the current card asks for authorisation while nothing is read yet')
+ assert.equal(rowButtons().filter(node=>labelOf(node)==='移出列表').length,2,'only the two added accounts can remove themselves')
+ assert.equal(rowButtons().filter(node=>labelOf(node)==='使用此账号').length,3,'the default sign-in row and both accounts can be selected')
+ assert.ok(!text.includes('codebuddy login --spare'),'a signed-in row does not render its command')
 
- await click(menu)
- const text=JSON.stringify(tree.toJSON())
- assert.ok(text.includes('已登录：'),'the open branch shows the identity the CLI recorded')
- assert.ok(buttons().some(node=>labelOf(node)==='移出列表'),'the open branch reveals the removal action')
- assert.ok(buttons().some(node=>labelOf(node)==='生成官方登录命令'),'the open branch reveals the sign-in command')
- assert.ok(!text.includes('NaN'),'no figure may render as NaN')
+ // The unsigned account is the one that gets the repair path.
+ const prepare=rowButtons().find(node=>labelOf(node)==='生成官方登录命令')
+ assert.ok(prepare,'an unsigned row offers the sign-in command')
+ await click(prepare)
+ assert.ok(rowText().includes('codebuddy login --fresh'),'the generated command appears once asked for')
+
+ // Removal stays a two-step action, now on the row itself.
+ await click(rowButtons().find(node=>labelOf(node)==='移出列表'))
+ assert.ok(rowButtons().some(node=>labelOf(node)==='确认移出（保留本地登录数据）'),'removal asks once')
+ await click(rowButtons().find(node=>labelOf(node)==='取消移出'))
+ assert.ok(!rowButtons().some(node=>labelOf(node)==='确认移出（保留本地登录数据）'),'and can be backed out of')
+ assert.ok(!JSON.stringify(tree.toJSON()).includes('NaN'),'no figure may render as NaN')
 })

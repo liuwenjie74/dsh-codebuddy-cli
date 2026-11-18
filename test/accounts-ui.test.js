@@ -39,7 +39,7 @@ test('the summary strip carries exactly the four agreed facts', () => {
   assert.ok(targets.length >= 3, 'each summary cell must jump to the card it summarises')
 })
 
-test('a card offers one primary action and hides the rest behind the menu', () => {
+test('a card offers one primary action and every row its own two extra actions', () => {
   const currentStart = at("id: 'cb-account-current'")
   const listStart = at("id: 'cb-account-list'")
   const currentCard = client.slice(currentStart, listStart)
@@ -53,11 +53,14 @@ test('a card offers one primary action and hides the rest behind the menu', () =
   assert.ok(!panel.includes("t('quotaDisconnect')") || panel.indexOf("t('quotaDisconnect')") > panel.indexOf('details'), 'disconnecting stays inside the details fold')
 
   const rows = client.slice(at('const otherRows = []'), listStart)
-  assert.ok(rows.includes("t('accountMore')"), 'secondary row actions collapse into the menu')
-  assert.ok(rows.includes("'aria-expanded'"), 'the menu button must announce its state')
-  const collapsedRow = rows.split('\n').find((line) => line.includes("t('accountUse')"))
-  assert.ok(collapsedRow, 'each row keeps one visible primary action')
-  assert.ok(!collapsedRow.includes("t('accountPrepare')"), 'the sign-in command must not be a row button')
+  const headerRow = rows.split('\n').find((line) => line.includes("t('accountUse')"))
+  assert.ok(headerRow, 'each row keeps one visible primary action')
+  assert.ok(rows.includes("t('quotaRefresh')"), 'the row can refresh its own credits')
+  assert.ok(rows.includes("t('accountRemove')"), 'the row can remove itself')
+  assert.ok(rows.indexOf("t('quotaRefresh')") < rows.indexOf('identityLine(account.identity'), 'both actions sit on the row header, above the details')
+  assert.ok(!headerRow.includes("t('accountPrepare')"), 'the sign-in command must not be a row button')
+  assert.equal(client.includes("t('accountMore')"), false, 'the row menu is gone')
+  assert.equal(rows.includes("'aria-expanded'"), false, 'no account row expands a menu any more')
 })
 
 test('a row states its status once and shows its own credits', () => {
@@ -117,4 +120,19 @@ test('a row is named by the official record, not by the stored placeholder', () 
   const cancel = client.slice(at('const cancelAdd = async () => {'), at('// One figure of the credit panel'))
   assert.ok(cancel.includes('credentialsPresent'), 'cancelling keeps an account that already signed in')
   assert.ok(cancel.includes("action: 'remove'"), 'cancelling discards an unsigned placeholder')
+})
+
+test('a signed-in row keeps only its identity, its usage and its packages', () => {
+  const rows = client.slice(at('const otherRows = []'), at('const quotaAsked = React.useRef(null)'))
+  const branch = rows.slice(rows.indexOf('const signedIn = account.credentialsPresent === true'))
+  const onSigned = branch.slice(branch.indexOf("? h('div'"), branch.indexOf(": h('div'"))
+  assert.ok(onSigned.includes('identityLine('), 'a signed-in row shows who is signed in')
+  assert.ok(onSigned.includes('usageLine('), 'a signed-in row shows what it has used')
+  assert.ok(onSigned.includes("creditPackages(account.id, 'start')"), 'a signed-in row can open its package breakdown')
+  assert.equal(onSigned.includes('accountPrepare'), false, 'the sign-in command is not offered to a signed-in account')
+  assert.equal(onSigned.includes('copyLoginCommand'), false, 'nor is copying a sign-in command')
+  const offSigned = branch.slice(branch.indexOf(": h('div'"))
+  assert.ok(offSigned.includes("t('accountPrepare')"), 'an unsigned row offers the sign-in command')
+  assert.equal(rows.includes('lastUsedLine('), false, 'rows no longer carry a last-used line')
+  assert.ok(rows.includes("creditPackages('legacy', 'start')"), 'the everyday login row carries its breakdown too')
 })

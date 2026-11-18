@@ -26,26 +26,25 @@ test('the heading carries the counters, the timestamp and the refresh', () => {
   assert.ok(block.includes('refreshModels'), 'the refresh stays on the heading row')
 })
 
-test('the state tabs and the search box are the only always-visible filters', () => {
-  const tabs = at('const modelTabs = [')
-  const block = client.slice(tabs, tabs + 320)
-  for (const key of ['modelsTabAll', 'modelsTabEnabled', 'modelsTabDisabled']) {
-    assert.ok(block.includes(key), `the tab row must offer ${key}`)
-  }
-  const filtered = at('const filtered = models.filter')
-  assert.ok(client.slice(filtered, filtered + 400).includes("modelFilter === 'all'"), 'the tab must actually filter the table')
-  assert.ok(client.slice(filtered, filtered + 400).includes('hiddenModels.has(item.id)'), 'the tab must read the disabled set')
+test('the state tabs are gone and enabled rows float to the top', () => {
+  assert.equal(client.includes('const modelTabs = ['), false, 'the state tabs are gone')
+  assert.equal(client.includes('modelFilter'), false, 'no state filter remains on the page')
+  const shown = at('const shown = filtered.slice().sort(')
+  const block = client.slice(shown, shown + 700)
+  assert.ok(block.includes('Number(hiddenModels.has(a.id)) - Number(hiddenModels.has(b.id))'), 'enabled rows sort first')
+  assert.ok(block.includes('if (!sortKey) return 0'), 'a clicked column only orders inside those two groups')
+  assert.ok(client.slice(at('const filtered = models.filter'), at('const filtered = models.filter') + 300).includes('includes(search.toLowerCase())'), 'the search box still filters')
 })
 
-test('batch actions appear only once something is selected', () => {
-  const row = at("selectedModels.length ? h('div', { style: { ...rowStyle, gap: 8 } },")
+test('the batch actions hold one place and arm themselves on selection', () => {
+  const row = at("translate(t, 'modelsTabAll', { count: models.length })")
   const block = client.slice(row, row + 1600)
-  assert.ok(block.includes('toggleSelectedModels'), 'the selected-only bar owns the batch actions')
-  assert.ok(block.includes("t('clearSelection')"), 'the selected-only bar can clear the selection')
-  // The always-visible row must not carry them any more.
-  const tabRow = at("...modelTabs.map(([id, labelKey, count]) => h('button', {")
-  const tabBlock = client.slice(tabRow, row)
-  assert.equal(tabBlock.includes('toggleSelectedModels'), false, 'the tab row must not keep batch buttons')
+  for (const key of ['disableSelected', 'enableSelected', 'clearSelection']) {
+    assert.ok(block.includes(`t('${key}')`), `the toolbar keeps ${key} in place`)
+  }
+  assert.ok(block.includes('disabled: !selectedModels.length'), 'the actions arm once a row is selected')
+  assert.equal(client.includes("selectedModels.length ? h('div'"), false, 'the batch bar is no longer conditional')
+  assert.equal(client.includes('disableSelectedCount'), false, 'the counts left the button labels')
 })
 
 test('the footer states the totals and the billing caveat in one line', () => {
