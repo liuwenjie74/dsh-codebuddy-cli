@@ -43,7 +43,7 @@
   "feedbackfrequency": "出现频率及同样操作能否复现",
   "feedbacknetwork": "网络/代理使用情况（不知道请写未知，不要提供代理密码）",
   "feedbackworkaround": "已尝试的方法及其结果（可选）",
-  "feedbackRequired": "红色 # 必填：简述、实际结果和截图。黄色 # 最好填，普通 # 可选；后两类留空也能生成。日志会自动获取，无需先选本地文件。",
+  "feedbackRequired": "红色圆点：必填，简述、实际结果和截图。黄色圆点：最好填；灰色圆点：可选，后两类留空也能生成。日志会自动获取，无需先选本地文件。",
   "feedbackBasics": "1. 定位问题",
   "feedbackStory": "2. 经过与上下文",
   "feedbackEvidence": "3. 截图与补充材料",

@@ -43,7 +43,7 @@
   "feedbackfrequency": "Frequency and reproducibility",
   "feedbacknetwork": "Network/proxy use (or unknown; no proxy passwords)",
   "feedbackworkaround": "Attempts and results (optional)",
-  "feedbackRequired": "Red # required: summary, actual result and screenshots. Yellow # recommended; normal # optional. Only required fields block export. Logs are collected automatically.",
+  "feedbackRequired": "Red dot: required -- summary, actual result and screenshots. Yellow dot: recommended. Grey dot: optional. Only required fields block export. Logs are collected automatically.",
   "feedbackBasics": "1. Identify the incident",
   "feedbackStory": "2. Steps and context",
   "feedbackEvidence": "3. Screenshots and supplements",

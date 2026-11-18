@@ -226,5 +226,21 @@
   "metricSamples": "Detailed samples",
   "metricSamplesRedacted": "Redacted samples",
   "hintShow": "Show explanation",
-  "modelFallbackNotice": "The requested model was unavailable, so the default model was used: requested {requested} → used {used}. A session already sitting on a disabled model still has to pick another model."
+  "modelFallbackNotice": "The requested model was unavailable, so the default model was used: requested {requested} → used {used}. A session already sitting on a disabled model still has to pick another model.",
+  "maxConcurrency": "Max concurrent calls",
+  "maxConcurrencyToggle": "0 means unlimited; new requests queue once the limit is reached",
+  "maxConcurrencyNote": "Throttling applies only to the layer that starts CLI calls for this plugin: once the limit is reached, new requests wait instead of hitting the official service all at once, which avoids 429 storms. 0 keeps the previous unbounded behaviour. The value is stored in the DSH configuration.",
+  "logLevel": "Log level",
+  "logLevelNote": "The level only changes how much diagnostics get written: failures records failed calls only, all calls records every call, and debug currently matches all calls (reserved for finer diagnostics). It never changes the request payload or the model output.",
+  "logLevelError": "Failures only",
+  "logLevelInfo": "All calls",
+  "logLevelDebug": "Debug",
+  "logConsoleTitle": "Log console",
+  "logConsoleEmpty": "No logs recorded in this process yet.",
+  "autoSyncCatalog": "Auto-sync model catalog",
+  "autoSyncCatalogToggle": "Refresh once in the background when the snapshot expires",
+  "autoSyncCatalogNote": "When on, a catalog snapshot older than its cache window is refreshed once in the background; when off, the catalog only updates after you press Refresh models. The switch takes effect immediately and is stored in the DSH configuration.",
+  "imageBase64": "Inline images as Base64",
+  "imageBase64Toggle": "When off, requests with images fall back to the offload hint",
+  "imageBase64Note": "When on, image attachments are inlined into the request as Base64. When off, nothing is inlined and a request that carries images reports an offload requirement instead, so an oversized body is never built silently. The switch takes effect immediately and is stored in the DSH configuration."
 }

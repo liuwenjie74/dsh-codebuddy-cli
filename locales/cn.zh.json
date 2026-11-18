@@ -226,5 +226,21 @@
   "metricSamples": "详细样本",
   "metricSamplesRedacted": "脱敏样本",
   "hintShow": "显示说明",
-  "modelFallbackNotice": "本次请求的模型不可用，已自动改用默认模型：请求 {requested} → 实际 {used}。停用某模型后，正停在该模型上的既有会话仍需重新选择模型。"
+  "modelFallbackNotice": "本次请求的模型不可用，已自动改用默认模型：请求 {requested} → 实际 {used}。停用某模型后，正停在该模型上的既有会话仍需重新选择模型。",
+  "maxConcurrency": "最大并发调用",
+  "maxConcurrencyToggle": "0 表示不限制；达到上限后新请求排队等待",
+  "maxConcurrencyNote": "限流只作用于本插件发起 CLI 调用的那一层：达到上限后新请求排队等待，而不是同时压向官方服务，用来避免 429 雪崩。0 为不限制，保持原有行为。该值保存在 DSH 配置里。",
+  "logLevel": "日志级别",
+  "logLevelNote": "日志级别只影响诊断日志的写入量：仅失败只记失败请求，全部调用记录每次调用，调试目前与全部调用相同（保留给更细的诊断）。它不改变请求内容，也不影响模型输出。",
+  "logLevelError": "仅失败",
+  "logLevelInfo": "全部调用",
+  "logLevelDebug": "调试",
+  "logConsoleTitle": "日志控制台",
+  "logConsoleEmpty": "本进程还没有可显示的日志。",
+  "autoSyncCatalog": "自动同步模型目录",
+  "autoSyncCatalogToggle": "目录快照过期时在后台刷新一次",
+  "autoSyncCatalogNote": "开启后，模型目录快照超过缓存时间会在后台自动刷新一次；关闭后只有手动点「刷新模型与倍率」才会更新。切换即时生效，保存在 DSH 配置里。",
+  "imageBase64": "图片自动转 Base64",
+  "imageBase64Toggle": "关闭后带图请求改走离线通道提示",
+  "imageBase64Note": "开启后图片附件会内联进请求（Base64）。关闭后不再内联，带图请求会以「图片需走离线通道」提示，避免把图片塞进过大的请求体。切换即时生效，保存在 DSH 配置里。"
 }

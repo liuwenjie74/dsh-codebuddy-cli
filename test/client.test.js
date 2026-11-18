@@ -12,7 +12,7 @@ test('one UI keeps regional drafts, actions, consent, log exports and diagnostic
   let snapshot={status:'ready',writable:true,revision:1,value:{cliPath:'',configDir:region+'-profile',model:'',effort:'',timeoutMs:180000}};const listeners=new Set()
   return [region,{getSnapshot:()=>snapshot,subscribe:f=>{listeners.add(f);return()=>listeners.delete(f)},async mutate(ops,revision){assert.equal(revision,snapshot.revision);snapshot={...snapshot,value:{...snapshot.value},revision:revision+1};for(const op of ops)snapshot.value[op.path[0]]=op.value;listeners.forEach(f=>f())}}]
  }))
- const statuses=Object.fromEntries(['cn','intl'].map(r=>[r,{pluginVersion:PLUGIN_VERSION,timeoutMs:180000,activeCalls:0,cliCheck:{state:'available',version:'9.8.7'},setup:{state:'idle'},usage:{calls:r==='cn'?2:7,inputTokens:10,outputTokens:1},catalog:{state:'ready',fetchedAt:1,models:[{id:'same-model',name:r,multiplier:r==='cn'?.2:.7,efforts:[],supportsImages:true}]},accounts:{supported:true,selectedId:null,accounts:[]},logs:{entries:1,failures:0,samples:0,captureArmed:false}}]))
+ const statuses=Object.fromEntries(['cn','intl'].map(r=>[r,{status:'ready',pluginVersion:PLUGIN_VERSION,timeoutMs:180000,activeCalls:0,cliCheck:{state:'available',version:'9.8.7'},setup:{state:'idle'},usage:{calls:r==='cn'?2:7,inputTokens:10,outputTokens:1},catalog:{state:'ready',fetchedAt:1,models:[{id:'same-model',name:r,multiplier:r==='cn'?.2:.7,efforts:[],supportsImages:true}]},accounts:{supported:true,selectedId:null,accounts:[]},logs:{entries:1,failures:0,samples:0,captureArmed:false}}]))
  const sandbox=vm.createContext({React,TextEncoder,TextDecoder,AbortController,setInterval:()=>1,clearInterval(){},clearTimeout(){},setTimeout:()=>1,navigator:{clipboard:{writeText:async()=>{}}},Blob,
   URL:{createObjectURL:()=> 'blob:fixture',revokeObjectURL(){}},document:{body:{appendChild(){}},createElement(){return{click(){downloads.push(this.download)},remove(){}}}},
   window:{__ModuleLoader__:{load(m){api=m.factory(()=>React)}}},
@@ -56,4 +56,26 @@ test('one UI keeps regional drafts, actions, consent, log exports and diagnostic
  assert.ok(JSON.stringify(tree.toJSON()).includes('帧 2/4'))
  assert.ok(!text.includes('NaN'))
  assert.equal(region('cn').findAllByType('input').find(n=>n.props.list).props.list==='dsh-codebuddy-cn-models',true)
+})
+
+test('an unready region is hidden from the picker and the panel',async t=>{
+ let api,page,props;const dictionaries={},registrations=[]
+ const forms=Object.fromEntries(['cn','intl'].map(region=>{
+  let snapshot={status:'ready',writable:true,revision:1,value:{cliPath:'',configDir:region+'-profile',model:'',effort:'',timeoutMs:180000}};const listeners=new Set()
+  return [region,{getSnapshot:()=>snapshot,subscribe:f=>{listeners.add(f);return()=>listeners.delete(f)},async mutate(){}}]
+ }))
+ const statuses={cn:{status:'ready',pluginVersion:PLUGIN_VERSION,timeoutMs:180000,activeCalls:0,cliCheck:{state:'available',version:'9.8.7'},setup:{state:'idle'},usage:{calls:0,inputTokens:0,outputTokens:0},catalog:{state:'ready',fetchedAt:1,models:[]},accounts:{supported:true,selectedId:null,accounts:[]},logs:{entries:0,failures:0,samples:0,captureArmed:false}},intl:{status:'pending'}}
+ const sandbox=vm.createContext({React,TextEncoder,TextDecoder,AbortController,setInterval:()=>1,clearInterval(){},clearTimeout(){},setTimeout:()=>1,navigator:{clipboard:{writeText:async()=>{}}},Blob,
+  URL:{createObjectURL:()=> 'blob:fixture',revokeObjectURL(){}},document:{body:{appendChild(){}},createElement(){return{click(){},remove(){}}}},
+  window:{__ModuleLoader__:{load(m){api=m.factory(()=>React)}}},
+  fetch:async url=>{const region=url.includes('-intl/')?'intl':'cn';return{ok:true,json:async()=>structuredClone(statuses[region])}}
+ })
+ vm.runInContext(await readFile(new URL('../lib/client.js',import.meta.url),'utf8'),sandbox)
+ const ctx={effect:fn=>fn(),locale:{register:(ns,v)=>{dictionaries[ns]=v;return()=>{}},bind:ns=>key=>dictionaries[ns].zh[key]},configForms:{get:ns=>forms[ns.endsWith('intl')?'intl':'cn'],whileServed:(ns,fn)=>fn()},layout:{selectPanel(){},panelInfo:{getSnapshot:()=>({activePanelId:null})}},slots:{inject:(name,fn)=>fn(),register(options,component){registrations.push(options);if(options.name==='main'){page=component;props=options.inject()}return()=>{}}}}
+ api.apply(ctx)
+ let tree;await act(async()=>{tree=renderer.create(React.createElement(page,props))});t.after(()=>act(()=>tree.unmount()))
+ await act(async()=>{})
+ const nav=tree.root.findAllByType('nav').find(n=>n.props['aria-label']==='配置区域')
+ assert.deepEqual(nav.findAllByType('button').map(n=>n.children.join('')),['国内版'])
+ assert.deepEqual(tree.root.findAllByType('div').filter(n=>n.props['data-region']).map(n=>n.props['data-region']),['cn'])
 })
