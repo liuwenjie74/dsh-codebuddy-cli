@@ -120,13 +120,22 @@ test('the quota store persists only the refresh token and metadata', async t => 
 
   // describe() must not hand the token back to a caller.
   const described = await store.describe('legacy')
-  assert.deepEqual(Object.keys(described).sort(), ['authorized', 'domain', 'savedAt', 'uid'])
+  assert.deepEqual(Object.keys(described).sort(), ['authorized', 'domain', 'nickname', 'savedAt', 'source', 'uid'])
+
+  // A record either carries a device refresh token or declares itself a CLI-login
+  // note with no token at all; anything else is refused rather than half-stored.
+  await assert.rejects(store.write('mixed', { source: 'device', uid: 'uid-2', savedAt: 2 }), e => e.message === 'QUOTA_STORE_INVALID')
 
   const files = await readdir(directory)
   assert.deepEqual(files, ['legacy.json'])
   const raw = await readFile(path.join(directory, 'legacy.json'), 'utf8')
   assert.ok(raw.includes('refresh-abc'))
   assert.ok(!/accessToken|access_token/u.test(raw), 'an access token must never reach disk')
+
+  // A CLI-login binding is metadata only: it must not grow a token field.
+  await store.write('cli', { source: 'cli', uid: 'uid-3', nickname: 'N', domain: 'www.codebuddy.cn', savedAt: 3 })
+  assert.equal((await store.read('cli')).refreshToken, '', 'a CLI binding must store no token')
+  assert.equal((await store.describe('cli')).source, 'cli')
 
   await store.clear('legacy')
   assert.equal(await store.read('legacy'), null)

@@ -17,7 +17,7 @@ const COLLAPSED = [
   'intro', 'setupNote', 'cliCheckNote', 'accountNote', 'accountValidation', 'accountPrivacy',
   'accountGuideSteps', 'accountGuideErrors', 'modelNote', 'timeoutHelp',
   'rewriteClientNamesNote', 'captureRequestSamplesNote', 'catalogNote', 'imagesHelp',
-  'usageNote', 'balanceNote', 'logsNote', 'regionNote', 'pageEntryHint',
+  'usageNote', 'logsNote', 'regionNote', 'pageEntryHint',
   'feedbackIntro', 'feedbackRequired', 'feedbackScreenshotNote', 'feedbackPrivacy',
   'feedbackAttachmentNote', 'feedbackDetailNote', 'feedbackLogToolsNote', 'feedbackLocalNote'
 ]

@@ -65,7 +65,7 @@ test('isolated child env scrubs competing credentials and preserves the parent a
   assert.deepEqual(cliEnv(config, parent), env)
   assert.equal(cliEnv({}, parent).CODEBUDDY_API_KEY, 'PRIVATE_A', 'legacy behavior remains unchanged')
 })
-test('missing credentials and unverified CLI versions fail closed without reading token contents', async t => {
+test('missing credentials fail closed and only unusable CLI versions are refused', async t => {
   const { store } = await setup(t, { resolveInvocation: async () => ({ command: 'C:\\Program Files\\nodejs\\node.exe', args: ['C:\\npm\\node_modules\\@tencent-ai\\codebuddy-code\\bin\\codebuddy'] }) })
   const a = await store.add('A'); await store.select(a.id)
   const config = await store.selected({})
@@ -77,8 +77,12 @@ test('missing credentials and unverified CLI versions fail closed without readin
   await mkdir(auth, { recursive: true }); await writeFile(path.join(auth, 'synthetic.info'), 'SYNTHETIC_NOT_A_TOKEN')
   await store.assertReady(config, inspect)
   await store.assertReady(config, async () => ({ version: '2.177.0', path: 'C:\\npm\\codebuddy.cmd' }))
-  for (const version of ['2.178.0', '2.177.0-beta.1', '3.0.0']) await assert.rejects(store.assertReady(config, async () => ({ version })), e => e.code === 'ACCOUNT_CLI_UNVERIFIED')
-  await assert.rejects(store.assertReady(config, async () => ({ version: '2.175.0', path: 'C:\\npm\\codebuddy.cmd' })), e => e.code === 'ACCOUNT_CLI_UNVERIFIED')
+  // The gate is a shape check plus a floor: a CLI newer than the verified list is
+  // allowed with a warning, so a released update never blocks the plugin.
+  for (const version of ['2.178.0', '2.175.0', '3.0.0']) await store.assertReady(config, async () => ({ version, path: 'C:\\npm\\codebuddy.cmd' }))
+  assert.equal((await store.snapshot()).cliVerdict.verdict, 'unverified')
+  // An unparsable version or one below the floor still fails closed.
+  for (const version of ['2.177.0-beta.1', '2.100.0', '']) await assert.rejects(store.assertReady(config, async () => ({ version, path: 'C:\\npm\\codebuddy.cmd' })), e => e.code === 'ACCOUNT_CLI_UNVERIFIED')
   const snapshot = await store.snapshot()
   assert.equal(snapshot.accounts[0].credentialsPresent, true)
   assert.equal(JSON.stringify(snapshot).includes('SYNTHETIC_NOT_A_TOKEN'), false)
