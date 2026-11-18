@@ -1,5 +1,15 @@
 # 更新记录 / Changelog
 
+## 2.1.5 — 兼容区间放宽、只读网络事实与文档归位
+
+- engines 放宽：`engines.dsh` 与 7 个 `@deepseek-ai/*` peerDependencies 的上限由 `<0.3.0-0` 放宽到 `<0.5.0-0`。**下限 `>=0.2.1-rc.2` 保持不变**——降低下限等于给更老的宿主开门，没有验证依据；而收紧上限正是上次宿主小版本前进就被 cordis 判为不兼容、静默禁用的根因，那样的静默失败不该重演。
+- 新增只读网络事实：`lib/shared/net.js` 读取进程实际生效的代理（`HTTPS_PROXY` / `https_proxy` / `HTTP_PROXY` / `ALL_PROXY`）、`NODE_EXTRA_CA_CERTS`、`NODE_USE_ENV_PROXY` 与 Node 主版本，并给出四态判定：`proxy-active`（代理生效）、`proxy-inert`（配了代理但 Node 24 起未设 `NODE_USE_ENV_PROXY=1`，值在却仍直连）、`ca-only`、`direct`。
+- 代理地址中的凭据一律剥除，只保留协议与主机名；该模块零网络 IO、零存储，不写日志。诊断区新增一行「网络：代理 … · 自定义 CA … · Node …」，说明挂在同一行的内联图标上。
+- 为什么不做成配置开关：Node 内置 fetch 不读 `HTTPS_PROXY`，自定义 CA 必须在进程启动前由 `NODE_EXTRA_CA_CERTS` 指定。两者都是进程级事实，插件开关无法改变它们，只能如实显示——这正是企业网或 TLS 抓包网关下「为什么请求走不通」最需要的一条信息。
+- 文档归位：删除 `docs/cn/多账号使用指南.md` 与 `docs/cn/ACCOUNT_GUIDE.en.md` 两份 0.4.0 时期旧副本。它们写着「安装 0.4.0 安装包」「DSH 0.2.1-rc.2 及以上、0.3.0 之前」，版本与约束均已失效，且全仓零引用（`accountGuideUrl` 两处均指向 `docs/intl/`）。保留会误导，故删除；git 历史可回滚。
+- 未实现（如实记录）：启动兼容性自检。宿主版本在运行时没有可读来源——`app.asar` 内层被 DSH 的 `PATH_RESTRICTED` 拒读，PATH 上 `dsh --version` 指向 npm 全局 CLI 而非桌面端宿主，profile 内 `@deepseek-ai/` 只有 cosmokit 与 schemastery；`cordis_inspect_list` 亦确认宿主只暴露 Service / Event / Config / Tool / Slots / Theme 六类只读侦察，没有版本方法。因此不写一个显示猜测版本号的「自检」。
+- 说明：并发退避（`maxConcurrency` + 排队闸）与脱敏审计（`lib/shared/request-audit.js`）分别在 2.1.1 与第 3 批已完成，本版不重复。
+
 ## 2.1.4 — 额度门控上线（路线 A 设备授权，真实数据 + 严格降级）
 
 - 新增：额度区可读取官方账号的真实额度。走官方客户端的设备授权流程（`/v2/plugin/auth/state` → 浏览器确认 → 轮询 `/v2/plugin/auth/token` → `/v2/plugin/login/account` 取身份），再用该身份查询 `get-user-resource`，展示剩余 / 总额 / 已用与资源包明细。

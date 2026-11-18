@@ -40,22 +40,22 @@
   ],
   "engines": {
     "node": ">=22.19.0",
-    "dsh": ">=0.2.1-rc.2 <0.3.0-0"
+    "dsh": ">=0.2.1-rc.2 <0.5.0-0"
   },
   "dependencies": {
     "cross-spawn": "^7.0.6"
   },
   "peerDependencies": {
-    "@deepseek-ai/dsh-attachment": ">=0.2.1-rc.2 <0.3.0-0",
+    "@deepseek-ai/dsh-attachment": ">=0.2.1-rc.2 <0.5.0-0",
     "@deepseek-ai/cordis": "^4.0.5",
-    "@deepseek-ai/dsh-client-locale": ">=0.2.1-rc.2 <0.3.0-0",
-    "@deepseek-ai/dsh-client-ui-plugin-manager": ">=0.2.1-rc.2 <0.3.0-0",
-    "@deepseek-ai/dsh-client-ui-renderer": ">=0.2.1-rc.2 <0.3.0-0",
-    "@deepseek-ai/dsh-client-ui-settings": ">=0.2.1-rc.2 <0.3.0-0",
-    "@deepseek-ai/dsh-llm": ">=0.2.1-rc.2 <0.3.0-0",
+    "@deepseek-ai/dsh-client-locale": ">=0.2.1-rc.2 <0.5.0-0",
+    "@deepseek-ai/dsh-client-ui-plugin-manager": ">=0.2.1-rc.2 <0.5.0-0",
+    "@deepseek-ai/dsh-client-ui-renderer": ">=0.2.1-rc.2 <0.5.0-0",
+    "@deepseek-ai/dsh-client-ui-settings": ">=0.2.1-rc.2 <0.5.0-0",
+    "@deepseek-ai/dsh-llm": ">=0.2.1-rc.2 <0.5.0-0",
     "@deepseek-ai/schemastery": "^3.18.5",
     "react": "^18.2.0",
-    "@deepseek-ai/dsh-client-ui-layout": ">=0.2.1-rc.2 <0.3.0-0"
+    "@deepseek-ai/dsh-client-ui-layout": ">=0.2.1-rc.2 <0.5.0-0"
   },
   "dsh": {
     "bundle": {

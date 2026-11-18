@@ -258,5 +258,7 @@
   "quotaNotAuthorized": "Quota access is not authorised. Credits belong to the official account: authorise to read them here, or check the official site.",
   "quotaUnavailable": "Quota is temporarily unavailable. Retry later or check the official site.",
   "quotaFailed": "Reading quota failed. Retry or check the official site.",
-  "quotaEmpty": "This account has no usable packages."
+  "quotaEmpty": "This account has no usable packages.",
+  "networkFacts": "Network: proxy {proxy} · custom CA {ca} · Node {node}",
+  "networkHint": "These are the values the running process actually has; the plugin neither stores nor changes them. The proxy comes from HTTPS_PROXY (or https_proxy / HTTP_PROXY / ALL_PROXY); from Node 24 on, built-in fetch also needs NODE_USE_ENV_PROXY=1 to use it, otherwise the value is present but requests still go direct. The custom CA comes from NODE_EXTRA_CA_CERTS and must point at a PEM file set before DSH starts. \"unknown\" means nothing is configured and requests go direct -- a common reason calls fail behind a corporate proxy or a TLS-inspecting gateway."
 }
