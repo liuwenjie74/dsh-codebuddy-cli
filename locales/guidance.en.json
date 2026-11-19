@@ -47,6 +47,7 @@
   "fix_CLI_CREDENTIAL_UNREADABLE": "The CLI sign-in record cannot be read. Check that the current user can read that file, or sign in again and refresh.",
   "fix_CLI_CREDENTIAL_ENCRYPTED": "The CLI sign-in record is encrypted and this plugin does not decrypt credentials. Use the device-authorisation button to read the quota instead.",
   "fix_CLI_CREDENTIAL_EXPIRED": "The CLI sign-in record has expired. Sign in again with the CLI, then refresh the quota on this page.",
+  "fix_CLI_CREDENTIAL_FOREIGN_REGION": "The readable sign-in record belongs to another region and is never used for this region's credits. Sign in to this region's account here, or use the device authorisation.",
   "fix_QUOTA_NETWORK": "The network request failed. Check connectivity and any proxy, then retry, or read the quota on the official site.",
   "fix_QUOTA_AUTH_UNAVAILABLE": "Quota authorisation could not be started. Retry shortly; if it keeps failing, check the network or read the quota on the official site.",
   "fix_QUOTA_STATE_MISSING": "The authorisation expired or was never started. Press Authorise quota access again and confirm the new link in your browser.",

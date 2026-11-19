@@ -112,8 +112,28 @@ test('junk in the auth directory is ignored instead of failing the read', async 
   assert.equal((await inspectCliCredential({ home, platform: 'win32' })).code, 'CLI_CREDENTIAL_MISSING')
 })
 
+test('a readable record from the other region is reported instead of "encrypted"', async t => {
+  const { home, write } = await fixture(t)
+  // The desktop app overwrote the local record with an encrypted envelope while the
+  // only readable record on disk belongs to the international account. Reading it as
+  // "encrypted" made the page claim there was no sign-in at all.
+  await write('workbuddy-desktop.info', record({ accessToken: { $wbEncrypted: 'cipher' }, refreshToken: { $wbEncrypted: 'cipher' } }))
+  await write('Tencent-Cloud.coding-copilot.info', record({ domain: 'www.codebuddy.ai', accessToken: 'intl-token' }))
+  const cn = await inspectCliCredential({ home, platform: 'win32', region: 'cn' })
+  assert.equal(cn.present, true)
+  assert.equal(cn.code, 'CLI_CREDENTIAL_FOREIGN_REGION')
+  assert.equal(cn.foreignRegion, true)
+  assert.equal(cn.domain, 'www.codebuddy.ai')
+  // The other region's token is never handed out for this region's credit read.
+  assert.equal(cn.accessToken, '')
+  // The same directory read for the matching region still yields a usable token.
+  const intl = await inspectCliCredential({ home, platform: 'win32', region: 'intl' })
+  assert.equal(intl.code, '')
+  assert.equal(intl.accessToken, 'intl-token')
+})
+
 test('every reported code has a UI explanation', () => {
   assert.deepEqual([...CLI_CREDENTIAL_CODES].sort(), [
-    'CLI_CREDENTIAL_ENCRYPTED', 'CLI_CREDENTIAL_EXPIRED', 'CLI_CREDENTIAL_MISSING', 'CLI_CREDENTIAL_UNREADABLE'
+    'CLI_CREDENTIAL_ENCRYPTED', 'CLI_CREDENTIAL_EXPIRED', 'CLI_CREDENTIAL_FOREIGN_REGION', 'CLI_CREDENTIAL_MISSING', 'CLI_CREDENTIAL_UNREADABLE'
   ])
 })

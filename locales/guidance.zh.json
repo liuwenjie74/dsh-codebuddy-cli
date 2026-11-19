@@ -47,6 +47,7 @@
   "fix_CLI_CREDENTIAL_UNREADABLE": "CLI 登录记录无法读取。请确认当前用户能读该文件，或重新登录 CLI 后再刷新。",
   "fix_CLI_CREDENTIAL_ENCRYPTED": "CLI 登录记录是加密格式，本插件不解析加密凭据。请改用「设备授权」按钮读取额度。",
   "fix_CLI_CREDENTIAL_EXPIRED": "CLI 登录记录已过期。请在 CLI 中重新登录，再回到本页刷新额度。",
+  "fix_CLI_CREDENTIAL_FOREIGN_REGION": "本机可读的登录记录属于另一个区域，不会用于本区额度。请在本环境登录本区账号，或点「设备授权」读取本区额度。",
   "fix_QUOTA_NETWORK": "网络请求失败。请检查网络与代理后重试，或直接去官网查看额度。",
   "fix_QUOTA_AUTH_UNAVAILABLE": "无法发起额度授权。请稍后重试；持续失败请检查网络，或去官网查看额度。",
   "fix_QUOTA_STATE_MISSING": "授权已过期或尚未发起。请重新点击「授权读取额度」，用新链接在浏览器确认。",

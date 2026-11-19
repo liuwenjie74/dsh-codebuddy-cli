@@ -89,7 +89,9 @@ test('account API, labelled routing and tool-image continuation keep synthetic p
   }
   await fetch(`${origin}/plugins/dsh-codebuddy-cli-cn/actions`, { method: 'POST', headers: { Origin: origin, 'Content-Type': 'application/json', 'X-DSH-CodeBuddy-Action': '1' }, body: JSON.stringify({ action: 'refreshModels' }) })
   const models = await adapter.listModels('codebuddy-cli-cn')
-  assert.equal(models[0].id, pinnedA); assert.ok(models[0].name.startsWith('[Synthetic A]'))
+  // The account rides on the model id; the display name is the plain model name, so the
+  // DSH picker shows one model list instead of one entry per account.
+  assert.equal(models[0].id, pinnedA); assert.equal(models[0].name.includes('Synthetic'), false)
   assert.equal((await adapter.resolveModel('codebuddy-cli-cn', pinnedA)).id, pinnedA)
   await assert.rejects(collect({ model: 'future-alpha', messages: [{ role: 'user', content: 'hello' }] }), e => e.code === 'ACCOUNT_MODEL_REQUIRED')
   const tools = [{ name: 'read_test', parameters: { type: 'object', properties: {} } }]
@@ -97,7 +99,8 @@ test('account API, labelled routing and tool-image continuation keep synthetic p
   const call = plan.find(x => x.type === 'block-end' && x.block.type === 'tool-call').block
   await action({ action: 'select', id: b.id })
   const bModels = await adapter.listModels('codebuddy-cli-cn')
-  assert.ok(bModels[0].name.startsWith('[Synthetic B]'))
+  // Same model under another account: the display name is identical, only the id differs.
+  assert.equal(bModels[0].name, models[0].name)
   assert.notEqual(bModels[0].id, pinnedA)
   const final = await collect({ model: pinnedA, messages: [
     { role: 'user', content: 'tool-round' }, { role: 'assistant', content: [call] },
