@@ -155,3 +155,16 @@ test('the status strip names an account the way its card does', () => {
   assert.ok(strip.includes('activeAccount.identity?.nickname'), 'the strip prefers the name the CLI recorded')
   assert.ok(strip.includes('|| activeAccount.label'), 'and falls back to the placeholder only when nothing is signed in')
 })
+
+test('a region counts as available as soon as its own status route answers', async () => {
+  // The probe used to demand a `status` field that the status payload never
+  // carried, so an enabled region could never appear in the switcher.
+  assert.match(client, /payload\.status === 'ready' \|\| typeof payload\.provider === 'string'/u,
+    'the region probe accepts a payload that only names its provider')
+  for (const region of ['cn', 'intl']) {
+    const source = await readFile(new URL(`../lib/${region}/index.js`, import.meta.url), 'utf8')
+    const start = source.indexOf('async function publicStatus(')
+    assert.ok(start > 0, `${region} exposes a status payload`)
+    assert.ok(source.slice(start, start + 900).includes('provider:'), `${region} status names its provider`)
+  }
+})

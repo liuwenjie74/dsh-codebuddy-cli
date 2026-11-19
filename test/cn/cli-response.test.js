@@ -221,3 +221,34 @@ test('native field and subtype facts distinguish missing, null and wrong termina
   assert.throws(() => collectStructuredResult('', { stderr: 'PRIVATE_UNKNOWN_FAILURE' }), e => e.responseDiagnostics.noticeClass === 'unknown' && e.responseDiagnostics.noticeSource === 'none')
   assert.throws(() => collectStructuredResult('', { stderr: 'Error: read ECONNRESET PRIVATE_NETWORK' }), e => e.responseDiagnostics.noticeClass === 'network' && e.responseDiagnostics.noticeSource === 'stderr')
 })
+
+test('a hidden CLI failure still reports its subtype and internal code', () => {
+  assert.throws(() => collectResult(JSON.stringify({
+    type: 'result', subtype: 'error_during_execution', is_error: true, error_code: 11115
+  })), error => {
+    assert.equal(error.code, 'CLI_REQUEST_FAILED')
+    assert.match(error.message, /subtype=error_during_execution/u)
+    assert.match(error.message, /error_code=11115/u)
+    assert.match(error.message, /上下文上限/u)
+    return true
+  })
+  assert.throws(() => collectResult(JSON.stringify({
+    type: 'result', is_error: true
+  })), error => {
+    assert.equal(error.code, 'CLI_REQUEST_FAILED')
+    assert.equal(/subtype=|error_code=/u.test(error.message), false)
+    return true
+  })
+})
+
+test('a context overflow without an HTTP status still classifies as a context limit', () => {
+  for (const notice of [
+    '[Error: 400 prompt is too long: 1449991 tokens > 1048576 maximum PRIVATE]',
+    'API Error: 400 prompt is too long: 1449991 tokens > 1048576 maximum',
+    'prompt is too long: 1449991 tokens > 1048576 maximum PRIVATE'
+  ]) assert.throws(() => collectResult('', { stderr: notice }), error => {
+    assert.equal(error.code, 'CLI_CONTEXT_TOO_LARGE')
+    assert.equal(error.message.includes('PRIVATE'), false)
+    return true
+  })
+})
