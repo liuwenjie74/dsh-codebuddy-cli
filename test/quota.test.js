@@ -130,11 +130,23 @@ test('the quota store persists only the refresh token and metadata', async t => 
   assert.deepEqual(files, ['legacy.json'])
   const raw = await readFile(path.join(directory, 'legacy.json'), 'utf8')
   assert.ok(raw.includes('refresh-abc'))
-  assert.ok(!/accessToken|access_token/u.test(raw), 'an access token must never reach disk')
+
+  // A device grant now also keeps the access token it was issued with, together with
+  // that token's expiry: reusing it while valid is what stops the row from asking for
+  // a new browser authorisation on every page open. The file stays owner-only, and
+  // describe() still never hands either token back.
+  const expiresAt = Date.now() + 24 * 3600 * 1000
+  await store.write('legacy', { source: 'device', refreshToken: 'refresh-abc', accessToken: 'access-def', expiresAt, uid: 'uid-1', domain: 'www.workbuddy.cn', savedAt: 1 })
+  const withToken = await store.read('legacy')
+  assert.equal(withToken.accessToken, 'access-def')
+  assert.equal(withToken.expiresAt, expiresAt)
+  const described2 = await store.describe('legacy')
+  assert.equal(Object.prototype.hasOwnProperty.call(described2, 'accessToken'), false, 'describe() never returns a token')
 
   // A CLI-login binding is metadata only: it must not grow a token field.
   await store.write('cli', { source: 'cli', uid: 'uid-3', nickname: 'N', domain: 'www.codebuddy.cn', savedAt: 3 })
   assert.equal((await store.read('cli')).refreshToken, '', 'a CLI binding must store no token')
+  await assert.rejects(store.write('cli2', { source: 'cli', accessToken: 'nope', uid: 'uid-3', savedAt: 3 }), e => e.message === 'QUOTA_STORE_INVALID')
   assert.equal((await store.describe('cli')).source, 'cli')
 
   await store.clear('legacy')

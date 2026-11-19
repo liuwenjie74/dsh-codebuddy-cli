@@ -1,5 +1,17 @@
 # 更新记录 / Changelog
 
+## 2.1.17 — 授权令牌复用、失败分型保留授权、额度失败入日志
+
+- 默认账号「每次打开都要重新授权」的根因不是凭据被清掉，而是每次读额度都硬要刷一次票：`quota-store` 原来只存 `refreshToken`，于是每次打开页面都先 `POST /v2/plugin/auth/token/refresh`，一旦上游回的不是 401/403 就既拿不到额度、又不留任何痕迹，界面上看起来就像从未授权。盘上实测也印证了这一点——`%LOCALAPPDATA%\dsh-codebuddy-cli-cn\quota\legacy.json` 一直在（`source=device`、uid `b2090505`、refreshToken 1606 字符）。
+- 设备授权现在同时保存它签发的 access token 与该 token 的到期时间（仅 `source=device`；`source=cli` 仍然不得携带任何 token），两侧 `readAccountQuota` 在 token 未过期（留 60 秒余量）时直接复用它读额度，只有确实过期才换票。新增 `expiryOf()` 统一解析上游三种到期形状（epoch 毫秒 / epoch 秒 / 只有 `expiresIn`），无法确信在未来的时间戳报 0，让上层按短命 token 处理而不是盲信。写盘只在记录确有变化时发生，避免每开一次页面就写一次磁盘。
+- 授权失败不再「一次就抹掉」：只有**明确拒绝**（刷新返回 401/403，或计费读 401/403）才计一次失效，连续 3 次才清除本地记录并提示重新授权；网络失败、5xx、404、响应形状不符一律保留文件、只提示，并带回「第 N/3 次」。之前一次被拒就 `clear()`，等于每被拒一次用户就得多点一次浏览器授权。
+- 额度失败码现在会写进诊断日志：`quotaRead` / `quotaRefresh` 走 `handleQuotaAction` 这个唯一漏斗，失败即落一条 `state:'error'`、`model:'quota'`、`errorCode:'QUOTA_*'` 的条目。此前 `grep QUOTA_*` 在日志里零命中，「读不到额度也查不出为什么」。同时两区 `diagnostics.record()` 的采样条件排除 `QUOTA_*`：额度失败没有模型负载，不该消耗用户手动 arm 的那一次请求采样。
+- 凭据选择顺序改为「未过期优先于区域」：同为本区未过期时仍按区域挑，但一条过期记录不再压过另一个区域的**新鲜**记录。域外记录的 token 依旧清空、只如实告知账号与域名，绝不借用。
+- 国际版状态路由 `?checkCli=1` 不再 `catch {}` 全吞 `assertReady` 的错误：探测仍不会返回 500（原意保留），但错误码留在 `runtimeStatus.accountError`，界面上能看出「这个账号没登录」或「CLI 版本不认」。
+- 两侧 `serializedRead` 增加 5 秒等待上限：读仍与写共用同一条队列（不会读到写一半的 index），但写锁长期占用时调用方快速返回 `ACCOUNT_STORE_BUSY`，不再把 `route()` 这条每请求热路径无限拖住。
+- `package-lock.json` 的 `version` 由 `1.0.5` 对齐到当前版本（`name` 是小写 npm 包名，保持不动）。
+- 回归：327 项测试全绿；`test/quota.test.js` 中「access token 绝不落盘」的旧断言按新口径重写——device 记录允许携带 accessToken 与到期时间，但 `describe()` 仍不回吐任何 token，`source=cli` 携带 token 必须被拒绝。
+
 ## 2.1.16 — 修复账号管理全黑崩溃、Bun 子进程堆积与前端/并发缺陷
 
 - 修复国内/国际版点击「账号管理」时因 `creditPanel` 在 `const guidance` 初始化前同步调用导致的 `ReferenceError` 页面全黑崩溃；修复默认登录模式下 `cliEnv` 缺失 `DISABLE_AUTOUPDATER`、`DISABLE_TELEMETRY`、`CODEBUDDY_DISABLE_AUTO_MEMORY`、`CODEBUDDY_CODE_DISABLE_BACKGROUND_TASKS` 且 `inspectCli`/`checkCli` 缺少去重缓存导致 Windows 下堆积大量 Bun/`bash.exe` 子进程的问题，并补齐活动子进程退出清理。
