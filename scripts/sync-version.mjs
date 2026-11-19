@@ -73,7 +73,7 @@ const UNRELATED_VERSIONS = new Set([
   // 改掉会让授权与计费请求的指纹偏离官方客户端，可能直接被上游拒绝。
   '2.63.2'
 ])
-const anyVersion = () => /(?<![A-Za-z0-9_.-])v?[0-9]+[.][0-9]+[.][0-9]+(?![A-Za-z0-9_.-])/gu
+const anyVersion = () => /(?<![A-Za-z0-9_.])v?[0-9]+[.][0-9]+[.][0-9]+(?=(?:\.tgz)?(?![A-Za-z0-9_.-]))/gu
 const isPluginVersion = (token) => !UNRELATED_VERSIONS.has(token.replace(/^v/u, ''))
 // 依赖/引擎区间（^4.0.5、>=22.19.0 之类）不是插件版本，判据是紧邻的运算符。
 const precededByComparator = (prefix) => /[~^><=]$/u.test(prefix.trimEnd())

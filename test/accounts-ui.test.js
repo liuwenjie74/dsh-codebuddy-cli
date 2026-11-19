@@ -52,7 +52,7 @@ test('every account block shows its credits the same way and keeps its own actio
   assert.ok(panel.includes('creditPackages('), 'the package breakdown lives in the credits panel, so every block gets it')
   assert.ok(!panel.includes("t('quotaDisconnect')") || panel.indexOf("t('quotaDisconnect')") > panel.indexOf('details'), 'disconnecting stays inside the details fold')
 
-  const rows = client.slice(at('const creditActions = '), at('const quotaAsked = React.useRef(null)'))
+  const rows = client.slice(at('const creditActions = '), at('const logRequest = '))
   // Rows share the card's shape through one helper: title and status on the left,
   // the very same credits panel and the row's own buttons on the right.
   assert.ok(rows.includes('const rowBlock = '), 'rows are built by one shared layout helper')
@@ -125,7 +125,7 @@ test('a row is named by the official record, not by the stored placeholder', () 
 })
 
 test('a signed-in row keeps only its identity and its packages', () => {
-  const rows = client.slice(at('const creditActions = '), at('const quotaAsked = React.useRef(null)'))
+  const rows = client.slice(at('const creditActions = '), at('const logRequest = '))
   assert.ok(rows.includes('identityLine(account.identity'), 'a signed-in row shows who is signed in')
   assert.equal(rows.includes('usageLine(account)'), false, 'rows no longer repeat the process usage line')
   assert.ok(rows.includes("creditPanel(key)"), 'its package breakdown arrives with the shared credits panel')
@@ -137,7 +137,7 @@ test('a signed-in row keeps only its identity and its packages', () => {
 })
 
 test('an added account is laid out exactly like the default sign-in row', () => {
-  const rows = client.slice(at('const creditActions = '), at('const quotaAsked = React.useRef(null)'))
+  const rows = client.slice(at('const creditActions = '), at('const logRequest = '))
   // Both rows are produced by rowBlock, so they cannot drift apart again: the only
   // per-row style is the hairline between them.
   assert.ok(rows.includes("rowBlock('legacy'"), 'the everyday login row uses the shared block')

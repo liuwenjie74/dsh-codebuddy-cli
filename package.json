@@ -2,14 +2,14 @@
   "name": "dsh-dkn-codebuddy-cli",
   "displayName": "CodeBuddy CLI",
   "description": "一个配置入口，两条独立的官方CLI区域通道；账号、模型目录和诊断按区域隔离。",
-  "version": "2.1.15",
+  "version": "2.1.16",
   "repository": {
     "type": "git",
-    "url": "https://github.com/liuwenjie74/dsh-DKN-codebuddy-cli.git"
+    "url": "https://github.com/liuwenjie74/dsh-codebuddy-cli.git"
   },
-  "homepage": "https://github.com/liuwenjie74/dsh-DKN-codebuddy-cli#readme",
+  "homepage": "https://github.com/liuwenjie74/dsh-codebuddy-cli#readme",
   "bugs": {
-    "url": "https://github.com/liuwenjie74/dsh-DKN-codebuddy-cli/issues"
+    "url": "https://github.com/liuwenjie74/dsh-codebuddy-cli/issues"
   },
   "scripts": {
     "test": "node --test --test-force-exit --test-timeout=60000 test/cn/*.test.js test/intl/*.test.js test/*.test.js",

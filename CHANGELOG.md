@@ -1,5 +1,19 @@
 # 更新记录 / Changelog
 
+## 2.1.16 — 修复账号管理全黑崩溃、Bun 子进程堆积与前端/并发缺陷
+
+- 修复国内/国际版点击「账号管理」时因 `creditPanel` 在 `const guidance` 初始化前同步调用导致的 `ReferenceError` 页面全黑崩溃；修复默认登录模式下 `cliEnv` 缺失 `DISABLE_AUTOUPDATER`、`DISABLE_TELEMETRY`、`CODEBUDDY_DISABLE_AUTO_MEMORY`、`CODEBUDDY_CODE_DISABLE_BACKGROUND_TASKS` 且 `inspectCli`/`checkCli` 缺少去重缓存导致 Windows 下堆积大量 Bun/`bash.exe` 子进程的问题，并补齐活动子进程退出清理。
+- 修复前端 `CodeBuddySettingsPage` 在早期 `return` 之后调用 `useRef`/`useEffect` 导致的 React Hook 顺序崩溃；修复 `maxConcurrency` 误套用 `timeoutMs` 的 `15000–600000` 输入范围；按 `[data-region]` 作用域修复国际版页内锚点跳转失效；在就绪态日志板块补回日志导出、清空确认与可折叠的 `IssueFeedback` 入口；暂停隐藏区域的后台状态轮询以减少无意义开销。
+- 修复国内/国际两区 `acquireCallSlot` 并发上限双倍计数（实际并发减半）并支持排队期间响应取消；为 `accounts.js` 读写操作串行化并增加 `.lock` 过期与失效 PID 自动回收；补齐国际版独立账号 `--setting-sources ''` 隔离、`GET /status?checkCli=1` 未登录不返 500 及延迟获取 `ctx.attachments`。
+- 修复国际版 `cli-process.js` 取消/超限未立即结束 Promise、POSIX 平台按进程组终止子进程防孤儿进程残留、`cli-image-process.js` 定时器 `.unref()` 与尾帧竞态、`local-http.js` 严格 Host 校验与 64 KiB Buffer UTF-8 解码、`quotaState.pending` 绑定 `accountId`、`images.js` 零拷贝与越界防护、`model-prefs.js` 并发加载去重及 failover 独立 `callId`。
+- 修复 `quota-client.js` 外部 `signal` 绕过 20 秒超时与合并资源包保留最早过期时间、`cli-invocation.js` `%dp0%` 路径拼接、`cli-credentials.js` 优先选用未过期凭据、`prompt-rewrite.js` 重叠正则重复计数、`request-audit.js` 截断超字节上限，以及 `scripts/sync-version.mjs` 对 `.tgz` 版本号的漏检并同步修正文档版本与下载链接。
+- 仓库改名为 `dsh-codebuddy-cli`：`git remote`、`package.json` 的 `repository.url` / `homepage` / `bugs`、两份 README 的下载链接、四份词表里的指南与适配范围链接、`check-links.mjs` 的仓库前缀，全部指向新地址。包名 `dsh-dkn-codebuddy-cli` 与 tarball 文件名保持不变（npm 包名一改就装不上），CHANGELOG 历史正文保留旧名以免失真。
+- 额度行的「本机可读的登录记录属于另一个区域（`{domain}` 的 `{nickname}`）」把占位符原样显示了出来：`CLI_CREDENTIAL_FOREIGN_REGION` 走的是纯 `t()` 查表，而该词条带两个占位符。现在改为 `translate()` 按名插值（英文词条是反序 `{nickname} at {domain}`，所以不能按位置传）。
+- 设备授权状态下「我已完成授权」出现两次：已有授权链接时，下面那行只留官网入口。同时把那一处的「复制登录命令」改为「复制授权链接」（新增中英 `copyAuthLink` 词条）——那里复制的是浏览器授权链接，不是 CLI 登录命令。
+- `maxConcurrency` 的界面范围原为 0–64，而两侧 `configOf` 都夹取 0–32，填 33–64 会静默按 32 生效。界面收到 0–32，与服务端同界，不再出现「填了却被悄悄改小」。
+- 国际版独立账号的 `--setting-sources` 已按账号隔离改为空值（不读用户级配置源），`test/intl/account-plugin.test.js` 的旧断言同步改为空串；cn 侧一直是这条规则，本次两侧一致。
+- 回归：327 项测试全绿（含新增的凭据域外记录、模型名去账号前缀、区域复探与不可读行终态用例）。
+
 ## 2.1.15 — 默认登录凭据可读优先、区域复探、模型名去掉账号前缀
 
 - 国内版默认登录显示「查询不到」的真因不是读取逻辑坏了，是盘上的记录换了：`%LOCALAPPDATA%\CodeBuddyExtension\Data\Public\auth` 下三份记录里，只有 `Tencent-Cloud.coding-copilot.info` 是明文，但它的域名已属国际版（`www.codebuddy.ai`）；国内版域名那份 `workbuddy-desktop.info` 是桌面应用写的 `$wbEncrypted` 加密信封。读取器原先是「先按域名筛本区域、再从池子里挑第一条可读的」，本区域池里只剩加密那一条就永不回落，于是界面上「尚无本地登录凭据」和「登录记录是加密格式」同时出现。

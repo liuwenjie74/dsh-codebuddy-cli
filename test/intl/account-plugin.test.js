@@ -119,7 +119,11 @@ test('account API, labelled routing and tool-image continuation keep synthetic p
   for (const call of calls) {
     assert.equal(call.competingAuth, false)
     assert.equal(call.args[call.args.indexOf('--model') + 1], 'future-alpha')
-    assert.equal(call.args[call.args.indexOf('--setting-sources') + 1], 'user')
+    // An account-scoped call reads no user-level setting sources: the isolated home
+    // carries its own configuration, and reading the user profile would leak the
+    // default account's login state into it. The cn suite has asserted this all along;
+    // intl aligned its source to the same rule, so the assertion follows the source.
+    assert.equal(call.args[call.args.indexOf('--setting-sources') + 1], '')
     assert.equal(call.args[call.args.indexOf('--tools') + 1], 'StructuredOutput')
   }
   state = await (await fetch(`${origin}/plugins/dsh-codebuddy-cli-intl/status`)).json()

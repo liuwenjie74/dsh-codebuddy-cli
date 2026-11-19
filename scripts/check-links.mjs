@@ -76,7 +76,7 @@ for (const file of markdown) {
 
 // 代码内指向本仓库的文档链接（toolCoverageUrl / accountGuideUrl 等）
 const client = await readFile(rel('lib/client.js'), 'utf8')
-const marker = 'https://github.com/liuwenjie74/dsh-DKN-codebuddy-cli/'
+const marker = 'https://github.com/liuwenjie74/dsh-codebuddy-cli/'
 const stopChars = new Set(["'", '"', '`', ')', ' ', '\n', '\t', '>', ']'])
 let index = client.indexOf(marker)
 while (index >= 0) {

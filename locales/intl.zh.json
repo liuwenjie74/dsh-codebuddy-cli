@@ -39,7 +39,7 @@
   "accountGuideSteps": "1. 新增隔离环境并填写本地备注。2. 生成命令并在新 PowerShell 窗口运行。3. 选择 International Site，核对登录身份后退出 CLI。4. 在设置页选择环境并刷新模型。5. 在 DSH 会话中选带该环境备注的模型。",
   "accountGuideErrors": "登录文件缺失时请在对应环境重新运行官方登录命令。旧模型 ID 不会自动沿用当前账号。401、网络或额度错误不会触发账号轮换；移出列表也不会注销或删除官方登录文件。",
   "accountGuideLink": "打开完整的多账号指南",
-  "accountGuideUrl": "https://github.com/liuwenjie74/dsh-DKN-codebuddy-cli/blob/main/docs/intl/多账号使用指南.md",
+  "accountGuideUrl": "https://github.com/liuwenjie74/dsh-codebuddy-cli/blob/main/docs/intl/多账号使用指南.md",
   "accountConfirmRemove": "确认移出列表",
   "accountCancel": "取消",
   "accountStoreScope": "备注仅用于本机区分环境，不代表已核验的官方账号身份。",

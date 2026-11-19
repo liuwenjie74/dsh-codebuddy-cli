@@ -39,7 +39,7 @@
   "accountGuideSteps": "1. Add an isolated environment and a local label. 2. Prepare its command and run it in a new PowerShell window. 3. Choose International Site, verify the identity, then exit the CLI. 4. Select the environment and refresh models. 5. Choose its labelled model in a DSH conversation.",
   "accountGuideErrors": "If sign-in is missing, rerun the official command for that environment. Old model IDs never inherit the current account. A 401, network or credit error never rotates accounts; removing an entry does not sign out or delete official sign-in files.",
   "accountGuideLink": "Open the full account guide",
-  "accountGuideUrl": "https://github.com/liuwenjie74/dsh-DKN-codebuddy-cli/blob/main/docs/intl/ACCOUNT_GUIDE.en.md",
+  "accountGuideUrl": "https://github.com/liuwenjie74/dsh-codebuddy-cli/blob/main/docs/intl/ACCOUNT_GUIDE.en.md",
   "accountConfirmRemove": "Confirm removal from list",
   "accountCancel": "Cancel",
   "accountStoreScope": "Labels are local hints and do not verify the official account identity.",
