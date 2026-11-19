@@ -64,9 +64,13 @@ test('every account row renders its own details and actions',async t=>{
  // A signed-in account states who it is and what it used, with no sign-in command.
  const text=rowText()
  assert.ok(text.includes('已登录：'),'a signed-in row shows the identity the CLI recorded')
- assert.ok(text.includes('本进程记录'),'a signed-in row shows its own usage')
+ // The process usage line belongs to the current account card only: a row that
+ // repeats it just makes the same number appear three times.
+ const listText=()=>JSON.stringify(panel().findAll(node=>node.props&&node.props.id==='cb-account-list')[0].findAll(()=>true).flatMap(node=>node.children||[]).filter(child=>typeof child==='string'))
+ assert.ok(!listText().includes('本进程记录'),'rows no longer repeat the process usage line')
  assert.ok(!rowButtons().some(node=>labelOf(node)==='更多操作'),'the row menu is gone')
- assert.equal(rowButtons().filter(node=>labelOf(node)==='刷新额度').length,3,'the card and both signed-in rows refresh their own credits')
+ assert.equal(rowButtons().filter(node=>labelOf(node)==='刷新额度').length,1,'one page-level button refreshes every account')
+ assert.equal(rowButtons().filter(node=>labelOf(node)==='重新选择程序').length,1,'the program picker sits on that same row')
  assert.equal(rowButtons().filter(node=>labelOf(node)==='授权读取额度').length,0,'the panel is read on open, so nothing asks for authorisation')
  assert.equal(rowButtons().filter(node=>labelOf(node)==='正在读取额度…').length,0,'an unsigned row never sits on a loading figure')
  assert.equal(rowButtons().filter(node=>labelOf(node)==='移出列表').length,2,'only the two added accounts can remove themselves')
@@ -90,6 +94,6 @@ test('every account row renders its own details and actions',async t=>{
  const refresh=rowButtons().filter(node=>labelOf(node)==='刷新额度')[0]
  assert.equal(refresh.props.disabled,false,'refresh stays available even before anything is read')
  await click(refresh)
- assert.ok(rowText().includes('已于'),'the row reports when it refreshed')
+ assert.ok(listText().includes('已于'),'each row reports when it refreshed')
  assert.ok(rowText().includes('2100'),'and shows the numbers it just read')
 })

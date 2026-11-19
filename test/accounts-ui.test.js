@@ -3,10 +3,10 @@ import assert from 'node:assert/strict'
 import { readFile } from 'node:fs/promises'
 
 // The accounts page follows a fixed reference layout: a summary strip, then the
-// current account, then the other accounts, then the add card, then the switch.
-// These assertions pin the parts of that layout the user checked by hand -- one
-// primary action per card, one status line per row, and the switch saving on its
-// own -- so a later edit cannot quietly reintroduce a second toolbar.
+// current account, then the other accounts, then the add card. These assertions
+// pin the parts of that layout the user checked by hand -- one page-level refresh,
+// one status line per row, and the rotation switch saving on its own, from the
+// connection page where it now lives.
 const client = await readFile(new URL('../lib/client.js', import.meta.url), 'utf8')
 const zh = JSON.parse(await readFile(new URL('../locales/cn.zh.json', import.meta.url), 'utf8'))
 
@@ -21,11 +21,10 @@ test('the accounts page keeps the reference card order', () => {
   const current = at("id: 'cb-account-current'")
   const list = at("id: 'cb-account-list'")
   const add = at("t('accountAddTitle')")
-  const rotation = at("id: 'cb-account-rotation'")
   assert.ok(summary < current, 'the summary strip must come before the current account card')
   assert.ok(current < list, 'the current account must come before the other accounts')
   assert.ok(list < add, 'the add card must sit at the end of the list')
-  assert.ok(add < rotation, 'the switch must be its own card after the add card')
+  assert.equal(client.includes("id: 'cb-account-rotation'"), false, 'the switch is no longer a card on this page')
 })
 
 test('the summary strip carries exactly the four agreed facts', () => {
@@ -35,7 +34,7 @@ test('the summary strip carries exactly the four agreed facts', () => {
   for (const label of ['accountSummaryCurrent', 'accountSummarySigned', 'quotaRemain', 'accountSummaryRotation']) {
     assert.ok(block.includes(label), `summary must show ${label}`)
   }
-  const targets = block.match(/'cb-account-[a-z]+'/gu) ?? []
+  const targets = block.match(/'cb-(?:account|rewrite)[a-z-]*'/gu) ?? []
   assert.ok(targets.length >= 3, 'each summary cell must jump to the card it summarises')
 })
 
@@ -48,8 +47,8 @@ test('every account block shows its credits the same way and keeps its own actio
 
   const panelStart = at('const creditPanel = ')
   const panel = client.slice(panelStart, at('const usageLine = ', panelStart))
-  assert.equal((panel.match(/primaryButtonStyle/gu) ?? []).length, 1, 'the credits panel keeps a single primary action')
-  assert.ok(panel.includes("t('quotaRefresh')"), 'the remaining primary action is the credits refresh')
+  assert.equal((panel.match(/primaryButtonStyle/gu) ?? []).length, 0, 'the credits panel holds no action of its own any more')
+  assert.equal(panel.includes("t('quotaRefresh')"), false, 'refreshing moved to the page toolbar')
   assert.ok(panel.includes('creditPackages('), 'the package breakdown lives in the credits panel, so every block gets it')
   assert.ok(!panel.includes("t('quotaDisconnect')") || panel.indexOf("t('quotaDisconnect')") > panel.indexOf('details'), 'disconnecting stays inside the details fold')
 
@@ -59,6 +58,7 @@ test('every account block shows its credits the same way and keeps its own actio
   assert.ok(rows.includes('const rowBlock = '), 'rows are built by one shared layout helper')
   assert.ok(rows.includes('creditActions(key, buttons)'), 'rows reuse the credits panel instead of a second figure')
   assert.equal((rows.match(/primaryButtonStyle/gu) ?? []).length, 0, 'refresh stays the only primary button, so row buttons are secondary')
+  assert.equal(rows.includes("t('quotaRefresh')"), false, 'no row refreshes its own credits')
   assert.ok(rows.includes("t('accountUse')"), 'a row can be selected')
   assert.ok(rows.includes("t('accountRemove')"), 'a row can remove itself')
   assert.ok(rows.includes("t('accountPrepare')"), 'an unsigned row can still ask for its sign-in command')
@@ -66,11 +66,24 @@ test('every account block shows its credits the same way and keeps its own actio
   assert.equal(rows.includes("'aria-expanded'"), false, 'no account row expands a menu any more')
 })
 
-test('the switch saves the moment it moves', () => {
-  const start = at("id: 'cb-account-rotation'")
-  const card = client.slice(start, start + 1400)
-  assert.ok(card.includes('Switch'), 'the switch card owns the control')
-  assert.ok(card.includes("accountAction('rotation'"), 'flipping it saves without a separate button')
+test('one refresh button covers every account, beside the program picker', () => {
+  const start = at("t('accountPickProgram')")
+  const row = client.slice(start - 900, start + 900)
+  assert.ok(row.includes("t('quotaRefresh')"), 'the refresh sits on the same row as the program picker')
+  assert.ok(row.includes('primaryButtonStyle'), 'and is the one primary action of the page')
+  const helper = client.slice(at('const refreshAll = '), at('const creditActions = '))
+  assert.ok(helper.includes('for (const account of accountRows)'), 'it covers every added account')
+  assert.ok(helper.includes('targets.push(null)'), 'and the default sign-in row as well')
+  assert.ok(helper.includes('credentialsPresent === true'), 'while skipping accounts that have nothing to read')
+})
+
+test('the rotation switch saves the moment it moves, from the connection page', () => {
+  const sectionStart = at("id: 'cb-rewrite'")
+  const switchAt = at("t('accountRotation')", sectionStart)
+  const section = client.slice(switchAt - 500, switchAt + 700)
+  assert.ok(section.includes("t('accountRotation')"), 'the feature switches own the rotation switch')
+  assert.ok(section.includes('Switch'), 'and it is a switch, not a form field')
+  assert.ok(section.includes("accountAction('rotation'"), 'flipping it saves without a separate button')
 })
 
 test('the credits wording follows the renamed section', () => {
@@ -81,7 +94,7 @@ test('the credits wording follows the renamed section', () => {
 
 test('adding an account is one click and never asks for a name', () => {
   const start = at("id: 'cb-account-add'")
-  const card = client.slice(start, at("id: 'cb-account-rotation'", start))
+  const card = client.slice(start, at("h('details', null, h('summary'", start))
   assert.equal(card.includes("t('accountLabel')"), false, 'the label input is gone from the add card')
   assert.equal(card.includes("t('accountLegacy')"), false, 'the dead default-login button is gone')
   assert.ok(card.includes('onClick: addAccount'), 'one button starts the whole flow')
@@ -111,10 +124,10 @@ test('a row is named by the official record, not by the stored placeholder', () 
   assert.ok(cancel.includes("action: 'remove'"), 'cancelling discards an unsigned placeholder')
 })
 
-test('a signed-in row keeps only its identity, its usage and its packages', () => {
+test('a signed-in row keeps only its identity and its packages', () => {
   const rows = client.slice(at('const creditActions = '), at('const quotaAsked = React.useRef(null)'))
   assert.ok(rows.includes('identityLine(account.identity'), 'a signed-in row shows who is signed in')
-  assert.ok(rows.includes('usageLine(account)'), 'a signed-in row shows what it has used')
+  assert.equal(rows.includes('usageLine(account)'), false, 'rows no longer repeat the process usage line')
   assert.ok(rows.includes("creditPanel(key)"), 'its package breakdown arrives with the shared credits panel')
   assert.ok(rows.includes('signedIn ? null :'), 'the sign-in command is offered only while the account has no credential')
   const unsigned = rows.slice(rows.indexOf('signedIn ? null :'))
