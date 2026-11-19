@@ -2,9 +2,9 @@
 
 [简体中文](README.md)
 
-**Unified 2.1.14 supports DSH >=0.2.1-rc.2 <1.1.7 (including 0.2.2-rc.1 / rc.2 / rc.3).**
+**Unified 2.1.15 supports DSH >=0.2.1-rc.2 <1.1.7 (including 0.2.2-rc.1 / rc.2 / rc.3).**
 
-[Download v2.1.14](https://github.com/liuwenjie74/dsh-DKN-codebuddy-cli/releases/download/v2.1.14/dsh-dkn-codebuddy-cli-1.1.0.tgz) One package and one CodeBuddy sidebar page contain two separate official CLI providers. DSH retains conversation and business-tool control.
+[Download v2.1.15](https://github.com/liuwenjie74/dsh-DKN-codebuddy-cli/releases/download/v2.1.15/dsh-dkn-codebuddy-cli-1.1.0.tgz) One package and one CodeBuddy sidebar page contain two separate official CLI providers. DSH retains conversation and business-tool control.
 
 Choose a region in settings, then Connection, Models, Accounts, Usage or Logs. This changes the settings view only. Select the intended provider in each DSH conversation.
 
