@@ -35,6 +35,8 @@
   "accountOff": "Off",
   "accountOn": "On",
   "accountOtherTitle": "Other accounts",
+  "accountOverviewTitle": "Account overview",
+  "quotaAuthForeignRegion": "Note: the upstream sign-in page belongs to the other region; check the domain before authorising.",
   "accountPathError": "Invalid isolation directory; requests blocked",
   "accountPickProgram": "Choose another program",
   "accountPrepare": "Prepare official sign-in command",

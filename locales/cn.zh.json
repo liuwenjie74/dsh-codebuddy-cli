@@ -35,6 +35,8 @@
   "accountOff": "关",
   "accountOn": "开",
   "accountOtherTitle": "其他账号",
+  "accountOverviewTitle": "账号概览",
+  "quotaAuthForeignRegion": "注意：上游返回的是另一区域的登录页，请核对域名后再授权。",
   "accountPathError": "隔离目录异常，已阻止调用",
   "accountPickProgram": "重新选择程序",
   "accountPrepare": "生成官方登录命令",

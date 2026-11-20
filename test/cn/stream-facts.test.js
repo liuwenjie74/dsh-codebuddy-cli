@@ -9,9 +9,9 @@ import { processFacts } from '../../lib/cn/diagnostic-facts.js'
 const init = { type: 'system', subtype: 'init' }
 const result = { type: 'result', subtype: 'success', structured_output: { text: '中文🙂 C:\\demo', toolCalls: [] } }
 const jsonl = frames => frames.map(f => JSON.stringify(f)).join('\n') + '\n'
-function run(input, { cut = 0, close = true, code = 0, signalName, stderr = '', signal, timeoutMs = 200, later, killCloses = true } = {}) {
+function run(input, { cut = 0, close = true, code = 0, signalName, stderr = '', signal, timeoutMs = 200, terminalDrainMs = 15, later, killCloses = true } = {}) {
   let child
-  return runImageProcess('synthetic', [], { input: 'synthetic', timeoutMs, terminalDrainMs: 15, signal, spawnImpl() {
+  return runImageProcess('synthetic', [], { input: 'synthetic', timeoutMs, terminalDrainMs, signal, spawnImpl() {
     child = new EventEmitter()
     child.stdin = new PassThrough(); child.stdout = new PassThrough(); child.stderr = new PassThrough()
     let stopped = false
@@ -77,7 +77,10 @@ test('domestic preexisting init and metadata acceptance is measured, not silentl
 
 test('delayed duplicate results, error frames and permission frames remain terminal blockers after an otherwise good result', async () => {
   for (const [next, expected, reason] of [[result, 'STRUCTURED_OUTPUT_INVALID', 'multiple-results'], [{ type: 'error', error: 'PRIVATE_ERROR' }, 'CLI_REQUEST_FAILED', 'error-frame'], [{ type: 'control_request' }, 'CLI_PERMISSION_REQUIRED', 'permission-frame']]) {
-    await assert.rejects(run(jsonl([init, result]), { close: false, later: jsonl([next]) }), error => {
+    // The late frame has to land inside the terminal-drain window for this assertion to
+    // mean anything: a 5ms timer racing a 15ms window lost on a loaded machine and failed
+    // the test while the guarded behaviour was intact. The window is widened, not the check.
+    await assert.rejects(run(jsonl([init, result]), { close: false, later: jsonl([next]), terminalDrainMs: 1000, timeoutMs: 5000 }), error => {
       assert.equal(error.code, expected); assert.equal(error.processDiagnostics.streamReason, reason)
       assert.equal(error.processDiagnostics.firstFinalSeen, true)
       assert.equal(error.processDiagnostics.finalResultCount, expected === 'STRUCTURED_OUTPUT_INVALID' ? 2 : 1)
