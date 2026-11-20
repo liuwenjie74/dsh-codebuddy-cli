@@ -63,7 +63,10 @@ test('every account row renders its own details and actions',async t=>{
 
  // A signed-in account states who it is and what it used, with no sign-in command.
  const text=rowText()
- assert.ok(text.includes('已登录：'),'a signed-in row shows the identity the CLI recorded')
+ // The row now names the account the way the CLI recorded it -- nickname, a signed-in
+ // badge and a monospace uid/expiry line -- instead of one "已登录：…" sentence. What must
+ // hold is that the record's identity is still what is shown, so nickname and uid are checked.
+ assert.ok(text.includes('刘文杰')&&text.includes('b2090505'),'a signed-in row shows the identity the CLI recorded')
  // The process usage line belongs to the current account card only: a row that
  // repeats it just makes the same number appear three times.
  const listText=()=>JSON.stringify(panel().findAll(node=>node.props&&node.props.id==='cb-account-list')[0].findAll(()=>true).flatMap(node=>node.children||[]).filter(child=>typeof child==='string'))

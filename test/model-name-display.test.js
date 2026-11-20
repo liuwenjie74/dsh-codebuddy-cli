@@ -22,8 +22,10 @@ for (const region of ['cn', 'intl']) {
 
 test('the accounts panel states one status per row and always reaches a terminal balance', async () => {
   const source = await readFile(path.join(root, 'lib', 'client.js'), 'utf8')
-  // A row whose record exists must not also claim there is no credential.
-  assert.equal(source.includes("accountState?.defaultAccountId ? (accountState?.defaultLogin?.present ? null : t('accountNoCredential')) : t('accountDefaultEmpty')"), true)
+  // A row whose record exists must not also claim there is no credential. The row reads
+  // the record through a local alias now, so this follows the same three-state expression
+  // instead of the identifier it happened to be written with.
+  assert.equal(source.includes("accountState?.defaultAccountId ? (defId?.present ? null : t('accountNoCredential')) : t('accountDefaultEmpty')"), true)
   // An unreadable CLI record must no longer gate the read: the default login is one
   // machine-wide file that either region can own, so its readability says nothing about
   // whether credits can be read. Every row is asked and the server answers with a typed

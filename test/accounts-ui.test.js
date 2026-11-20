@@ -42,8 +42,8 @@ test('every account block shows its credits the same way and keeps its own actio
   const currentStart = at("id: 'cb-account-current'")
   const listStart = at("id: 'cb-account-list'")
   const currentCard = client.slice(currentStart, listStart)
-  assert.ok(currentCard.includes('creditPanel(currentKey)'), 'the current card shows its credits inline')
-  assert.ok(!currentCard.includes('primaryButtonStyle'), 'the card adds no second primary button of its own')
+  assert.ok(currentCard.includes('creditPanel(currentKey'), 'the current card shows its credits inline')
+  assert.equal((currentCard.match(/primaryButtonStyle/gu) ?? []).length, 1, 'the card holds only the single primary refresh button in its header')
 
   const panelStart = at('const creditPanel = ')
   const panel = client.slice(panelStart, at('const usageLine = ', panelStart))
@@ -128,7 +128,7 @@ test('a signed-in row keeps only its identity and its packages', () => {
   const rows = client.slice(at('const creditActions = '), at('const logRequest = '))
   assert.ok(rows.includes('identityLine(account.identity'), 'a signed-in row shows who is signed in')
   assert.equal(rows.includes('usageLine(account)'), false, 'rows no longer repeat the process usage line')
-  assert.ok(rows.includes("creditPanel(key)"), 'its package breakdown arrives with the shared credits panel')
+  assert.ok(rows.includes("creditPanel(key"), 'its package breakdown arrives with the shared credits panel')
   assert.ok(rows.includes('signedIn ? null :'), 'the sign-in command is offered only while the account has no credential')
   const unsigned = rows.slice(rows.indexOf('signedIn ? null :'))
   assert.ok(unsigned.includes("t('accountPrepare')"), 'an unsigned row offers the sign-in command')
@@ -142,10 +142,8 @@ test('an added account is laid out exactly like the default sign-in row', () => 
   // per-row style is the hairline between them.
   assert.ok(rows.includes("rowBlock('legacy'"), 'the everyday login row uses the shared block')
   assert.ok(rows.includes('rowBlock(account.id'), 'an added account uses the same shared block')
-  assert.equal((rows.match(/gridTemplateColumns: 'minmax\(200px, 1fr\) auto'/gu) ?? []).length, 1, 'the two-column layout is defined once')
-  for (const [name, slice] of [['default', rows.slice(0, rows.indexOf('for (const account of accountRows)'))], ['added', rows.slice(rows.indexOf('for (const account of accountRows)'))]]) {
-    assert.ok(slice.includes('quotaNoteLine('), `the ${name} row reports its own refresh outcome`)
-  }
+  assert.equal((rows.match(/gridTemplateColumns: 'minmax\(240px, 1fr\) minmax\(290px, 1\.15fr\)'/gu) ?? []).length, 1, 'the two-column layout is defined once')
+  assert.ok(rows.includes('quotaNoteLine(key)'), 'every row reports its own refresh outcome via creditActions')
   assert.equal(rows.includes('primaryButtonStyle'), false, 'no row adds a second primary button, so refresh keeps one colour everywhere')
   assert.ok(zh.quotaRefreshing && zh.quotaRefreshedAt, 'the refresh outcome needs words in both languages')
 })
