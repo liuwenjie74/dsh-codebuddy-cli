@@ -1,5 +1,11 @@
 # 更新记录 / Changelog
 
+## 2.1.24 — 修正缓存命中率公式、重设计失败记录卡片、日志默认展开并移除日志页反馈模块
+
+- **修正缓存命中率计算**：`status.usage.inputTokens` 已包含 `cacheReadTokens`，将公式从 `cacheReadTokens / (inputTokens + cacheReadTokens)` 修正为 `Math.min(100, Math.round((cacheReadTokens / inputTokens) * 100))`（例如 4.17M / 4.66M 现正确显示 89% 并高亮绿色）。
+- **重设计「最近失败记录」并过滤国际版取消噪音**：国际版 `rememberFailure` 与国内版对齐，跳过 `ABORTED` 与 `IMAGE_OFFLOAD_REQUIRED` 避免手动取消刷屏；前端每条失败记录改为带红色左指示条的独立卡片，顶部展示错误码徽章、模型名、时间与一键「复制 ID」，正文展示清晰报错与排查指引，技术诊断详情默认折叠；同时修正 `intlResponseNote` 空字段导致的 `· ·` 断句。
+- **日志控制台默认展示并移除日志页反馈模块（方案 A）**：进入【日志查看】板块时自动拉取并展开结构化日志时间线（新增「刷新日志」按钮，仍可手动收起）；移除【日志查看】底部的「问题反馈与取证包」折叠模块，同时保留底层导出与既有反馈测试兼容。
+
 ## 2.1.23 — 前端可视化仪表盘与结构化日志升级、单次请求序列化与深层稳定优化
 
 - **后端性能与稳定性**：`request.js`（CN/INTL）改为单次分段序列化后拼装外层 JSON，消除 12 MiB 大请求的双倍 `JSON.stringify` CPU 与峰值内存开销；`accounts.js` `snapshot()` 仅在串行队列内拷贝状态快照，释放队列后再并发读取凭据与 `login.ps1`，解除对热路径 `route()` 的阻塞；`prepareLogin` 纳入 `serializedRead()` 并转义 `cli.version` 中的正则特殊字符；`diagnostics.js` `persist()` 改用随机 UUID 临时文件防并发踩踏；国际版 `cli-image-process.js` 补齐非 `StructuredOutput` 原生 `tool_use` 熔断；修复 `inspectCli` 共享去重内层 `catch` 的 `signal.aborted` 穿透及 `readAccountQuota` 换票成功后的重复写盘。
