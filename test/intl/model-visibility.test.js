@@ -67,9 +67,11 @@ test('model preferences persist hidden ids, validate input and degrade safely', 
   await writeFile(path.join(versionedDirectory, 'index.json'), JSON.stringify({ version: 2, hidden: ['future-alpha'] }))
   assert.equal((await createModelPrefs({ directory: versionedDirectory }).snapshot()).storageError, 'MODEL_PREFS_INVALID')
 
+  // The stored-file ceiling is 256 KiB so a full 500-model hide list (500 × 256 chars)
+  // still fits; the guard is that anything above it is refused, not that 70 KB is.
   const hugeDirectory = await temp(t, 'dsh-model-prefs-huge-')
   await mkdir(hugeDirectory, { recursive: true })
-  await writeFile(path.join(hugeDirectory, 'index.json'), 'x'.repeat(70000))
+  await writeFile(path.join(hugeDirectory, 'index.json'), 'x'.repeat(300000))
   assert.equal((await createModelPrefs({ directory: hugeDirectory }).snapshot()).storageError, 'MODEL_PREFS_UNSAFE')
 
   const fullDirectory = await temp(t, 'dsh-model-prefs-full-')

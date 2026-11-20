@@ -1,5 +1,13 @@
 # 更新记录 / Changelog
 
+## 2.1.22 — 修复子进程退出兜底、账号与换票竞态、国际版默认账号展示一致性及前端边界缺陷
+
+- **子进程与资源清理**：将 `cli-image-process.js` 与 `model-catalog.js` 接入 `trackChild` 退出兜底并补齐 POSIX `detached: true` 进程组隔离；宿主 `exit` 回调改用同步强杀；`inspectCli` 并发去重改为按调用方独立响应 `AbortSignal` 并在安装完成后强制 `fresh: true`；`checkCli` 去重按 `(cliPath, configDir, accountId)` 分键。
+- **并发与账号状态一致性**：修复国际版 `streamWith` 排队取消导致 `accounts.begin` 活跃计数永久泄漏；将 `accounts.js` 中 `assertReady`/`configForId`/`defaultAccountId` 纳入 `serializedRead()`，写完 `.lock` 后立即关闭句柄以防 Windows 占用阻碍死锁回收；`acquireCallSlot` 唤醒后复查 `signal.aborted`。
+- **额度换票与存储加固**：修复 `readAccountQuota` 401/403 路径达到 3 次拒绝永不清理、新轮换 `refreshToken` 未及时落盘、并发无单飞及 `quotaDisconnect` 未清 `quotaFailures`；修复 `adoptLegacyGrant` 非默认账号永久锁死、并发跳过及误删 `legacy.json`；`quotaState.pending` 改为按账号分槽的 `Map`；`logQuotaFailure` 补齐 `at` 与 `accountId`；`quota-client.js` 补齐扁平响应 `expiryOf(body)` 回退、官方授权域名白名单及超时不重试；`quota-store.js` 拒绝非法 key 碰撞 `legacy.json` 并为 `clear()` 增加符号链接校验。
+- **HTTP 与 CN/INTL 对齐**：`local-http.js` 与 `model-prefs.js` 上限提高至 256 KiB 以完整支持 500 个模型批量切换；国际版 `cli-response.js` 透出 `result` 帧内全部已知错误码（含 401/403/429）并放宽 32 位 Windows `exitCode`。
+- **前端（`lib/client.js`）**：统一国际版隐藏默认账号口径（顶部状态条、已登录计数、概览条余额、`quotaRead`/`refreshAll` 全部跳过默认账号）；`loadBalances`/`quotaAction` 增加请求序号防旧响应覆盖新余额并合并批量状态更新；`foreignLink` 改用 `URL.hostname` 精确校验；`revealCliPath` 限定 `[data-region]` 作用域；`save()` 补上 `maxConcurrency` 整数范围 `0–32` 校验；修复 `accountGuide` 展开正文误显 `accountRemoved`、`multiplier` 未定义渲染 `×undefined`、数字 `expireAt` 渲染 `Invalid Date` 及国际版安装文档链接。
+
 ## 2.1.21 — 账号概览合并、国际版隐藏默认账号、授权链接区域提示
 
 - 账号管理里那一块分组标题从「其他账号」改为「账号概览」：本区默认账号与各独立账号收在同一个模块里，按同一套行样式排（本来就共用 `rowBlock`，只是标题把两者分成两堆）。行序、分隔符、行内布局均未变。
