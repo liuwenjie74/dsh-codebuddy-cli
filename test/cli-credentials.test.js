@@ -99,6 +99,31 @@ test('each region prefers its own domain and never borrows the other', async t =
   assert.equal(intl.accessToken, 'intl-token')
 })
 
+test('a default login only ever reports its own region', async t => {
+  const { home, write } = await fixture(t)
+  // The machine-wide default login holds exactly one record, and either region can own
+  // it. Asking for the China default must answer "nothing here" rather than printing
+  // the international account's nickname and domain inside the China panel.
+  await write('Tencent-Cloud.coding-copilot.info', record({ domain: 'www.codebuddy.ai', accessToken: 'intl-token' }))
+  const missing = await inspectCliCredential({ home, platform: 'win32', region: 'cn', localOnly: true })
+  assert.equal(missing.present, false)
+  assert.equal(missing.code, 'CLI_CREDENTIAL_MISSING')
+  const serialized = JSON.stringify(missing)
+  assert.equal(serialized.includes('intl-token'), false)
+  assert.equal(serialized.includes('codebuddy.ai'), false)
+  assert.equal(serialized.includes('uid-1'), false)
+
+  // A record this region really has is still reported, even an encrypted one:
+  // localOnly means "do not look at the other region", not "ignore what we have".
+  await write('workbuddy-desktop.info', record({ accessToken: { $wbEncrypted: 'cipher' }, refreshToken: { $wbEncrypted: 'cipher' } }))
+  const local = await inspectCliCredential({ home, platform: 'win32', region: 'cn', localOnly: true })
+  assert.equal(local.present, true)
+  assert.equal(local.code, 'CLI_CREDENTIAL_ENCRYPTED')
+  assert.equal(local.domain, 'www.codebuddy.cn')
+  assert.equal(local.foreignRegion, false)
+  assert.equal(local.accessToken, '')
+})
+
 test('junk in the auth directory is ignored instead of failing the read', async t => {
   const { home, write, directory } = await fixture(t)
   await write('broken.info', 'not json')
