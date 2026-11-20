@@ -30,3 +30,4 @@ ad75d1ef8737ba255f25fdda5c89a699c03b7d6d2a47c70af3245010e3f56ddc  dsh-dkn-codebu
 f4768004ffe059ef2672b6b56b964dfcc3290e061133ddd5b9037d408ef794a1  dsh-dkn-codebuddy-cli-2.1.15.tgz
 f35624b078401fcbf489e10b98c3b10088a70d9e5c93eb416673fea42c0d0d7c  dsh-dkn-codebuddy-cli-2.1.16.tgz
 8f5e3b0788eb670b0fa5e88d1e509d01f24ed72dcca6b6daecb7ec0c49720862  dsh-dkn-codebuddy-cli-2.1.20.tgz
+1b34b45259fa280cd1cc1f13a092caa9fb66da9f94fdcbe0873e7c312a612350  dsh-dkn-codebuddy-cli-2.1.21.tgz
