@@ -142,7 +142,7 @@ test('an added account is laid out exactly like the default sign-in row', () => 
   // per-row style is the hairline between them.
   assert.ok(rows.includes("rowBlock('legacy'"), 'the everyday login row uses the shared block')
   assert.ok(rows.includes('rowBlock(account.id'), 'an added account uses the same shared block')
-  assert.equal((rows.match(/gridTemplateColumns: 'minmax\(240px, 1fr\) minmax\(290px, 1\.15fr\)'/gu) ?? []).length, 1, 'the two-column layout is defined once')
+  assert.equal((rows.match(/gridTemplateColumns: 'repeat\(auto-fit, minmax\(260px, 1fr\)\)'/gu) ?? []).length, 1, 'the two-column layout is defined once')
   assert.ok(rows.includes('quotaNoteLine(key)'), 'every row reports its own refresh outcome via creditActions')
   assert.equal(rows.includes('primaryButtonStyle'), false, 'no row adds a second primary button, so refresh keeps one colour everywhere')
   assert.ok(zh.quotaRefreshing && zh.quotaRefreshedAt, 'the refresh outcome needs words in both languages')
