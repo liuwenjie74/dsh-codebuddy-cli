@@ -43,11 +43,32 @@ test('long explanations are collapsed behind the inline glyph', () => {
 })
 
 test('no explanation glyph is left alone on its own line', () => {
+  const indentOf = (row) => row.length - row.trimStart().length
+  // A refactor can put the glyph on its own source line while it still rides the same
+  // element as a title. What must never happen is a container that holds the glyph and
+  // nothing else, so a sibling child on an adjacent line at the same indentation
+  // satisfies the rule and a container without one still fails it.
+  const sharesContainerWithSibling = (index) => {
+    const indent = indentOf(lines[index])
+    for (const step of [-1, 1]) {
+      for (let at = index + step; at >= 0 && at < lines.length; at += step) {
+        const row = lines[at]
+        if (!row.trim()) continue
+        const other = indentOf(row)
+        if (other < indent) return false
+        if (other === indent) return row.trim().endsWith(',')
+        break
+      }
+    }
+    return false
+  }
   for (const key of COLLAPSED) {
-    for (const row of rowsWith(key).filter((line) => !isSummarySlot(line))) {
+    for (const [index, row] of lines.entries()) {
+      if (!row.includes(`t('${key}')`) || isSummarySlot(row)) continue
       const calls = (row.match(/h\(/gu) || []).length
       const glyphs = (row.match(/h\(Hint/gu) || []).length
-      assert.ok(calls - glyphs >= 1, `${key} must share its row with other content: ${row.trim().slice(0, 90)}`)
+      if (calls - glyphs >= 1) continue
+      assert.ok(sharesContainerWithSibling(index), `${key} must share its row with other content: ${row.trim().slice(0, 90)}`)
     }
   }
   // Section-level notes are handed to the heading row itself.

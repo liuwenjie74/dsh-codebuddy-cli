@@ -34,7 +34,10 @@ test('one UI keeps regional drafts, actions, consent, log exports and diagnostic
  let tree;await act(async()=>{tree=renderer.create(React.createElement(page,props))});t.after(()=>act(()=>tree.unmount()))
  const region=r=>tree.root.findAllByType('div').find(n=>n.props['data-region']===r)
  const button=(r,label)=>region(r).findAllByType('button').find(n=>n.children.join('')===label)
- const switchRegion=async name=>{await act(async()=>tree.root.findAllByType('nav').find(n=>n.props['aria-label']==='配置区域').findAllByType('button').find(n=>n.children.join('')===name).props.onClick())}
+ // The region switcher is one segmented group: a labelled role=group, not a <nav>,
+ // so it is found by its accessible name instead of by element type.
+ const regionGroup=()=>tree.root.findAll(n=>n.props&&n.props.role==='group'&&n.props['aria-label']==='配置区域')[0]
+ const switchRegion=async name=>{await act(async()=>regionGroup().findAllByType('button').find(n=>n.children.join('')===name).props.onClick())}
  const cnInput=region('cn').findAllByType('input').find(n=>n.props.list==='dsh-codebuddy-cn-models')
  await act(async()=>cnInput.props.onChange({target:{value:'cn-only-draft'}}))
  await switchRegion('国际版')
@@ -78,7 +81,7 @@ test('an unready region is hidden from the picker and the panel',async t=>{
  api.apply(ctx)
  let tree;await act(async()=>{tree=renderer.create(React.createElement(page,props))});t.after(()=>act(()=>tree.unmount()))
  await act(async()=>{})
- const nav=tree.root.findAllByType('nav').find(n=>n.props['aria-label']==='配置区域')
+ const nav=tree.root.findAll(n=>n.props&&n.props.role==='group'&&n.props['aria-label']==='配置区域')[0]
  assert.deepEqual(nav.findAllByType('button').map(n=>n.children.join('')),['国内版'])
  assert.deepEqual(tree.root.findAllByType('div').filter(n=>n.props['data-region']).map(n=>n.props['data-region']),['cn'])
 })

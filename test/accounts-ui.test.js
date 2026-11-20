@@ -94,7 +94,7 @@ test('the credits wording follows the renamed section', () => {
 
 test('adding an account is one click and never asks for a name', () => {
   const start = at("id: 'cb-account-add'")
-  const card = client.slice(start, at("h('details', null, h('summary'", start))
+  const card = client.slice(start, at("t('accountGuide')", start))
   assert.equal(card.includes("t('accountLabel')"), false, 'the label input is gone from the add card')
   assert.equal(card.includes("t('accountLegacy')"), false, 'the dead default-login button is gone')
   assert.ok(card.includes('onClick: addAccount'), 'one button starts the whole flow')
