@@ -7,6 +7,8 @@
   "accountConfirmRemove": "Confirm removal (keep local sign-in data)",
   "accountCreditsLeft": "{credits} credits left",
   "accountCreditsUnknown": "Credits not read",
+  "accountDefaultAccount": "Default account (this region)",
+  "accountDefaultEmpty": "No default account in this region yet: add an account, sign in once, then press \"Use this account\". The plugin will not borrow another region's record or the shared sign-in file.",
   "accountDefaultLogin": "Default CLI sign-in (read-only)",
   "accountExhausted": "Out of credits until {time}",
   "accountGuide": "Multiple-account guide",

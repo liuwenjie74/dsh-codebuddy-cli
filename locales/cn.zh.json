@@ -7,6 +7,8 @@
   "accountConfirmRemove": "确认移出（保留本地登录数据）",
   "accountCreditsLeft": "剩余 {credits} 分",
   "accountCreditsUnknown": "额度未读取",
+  "accountDefaultAccount": "本区默认账号",
+  "accountDefaultEmpty": "本区尚未设置默认账号：新增一个账号、完成一次登录，再点「使用此账号」。插件不会改用其他区域或共享目录里的登录记录。",
   "accountDefaultLogin": "默认 CLI 登录（只读）",
   "accountExhausted": "额度不足，暂停至 {time}",
   "accountGuide": "查看多账号使用指南",
