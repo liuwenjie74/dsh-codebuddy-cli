@@ -1,5 +1,11 @@
 # 更新记录 / Changelog
 
+## 2.1.23 — 前端可视化仪表盘与结构化日志升级、单次请求序列化与深层稳定优化
+
+- **后端性能与稳定性**：`request.js`（CN/INTL）改为单次分段序列化后拼装外层 JSON，消除 12 MiB 大请求的双倍 `JSON.stringify` CPU 与峰值内存开销；`accounts.js` `snapshot()` 仅在串行队列内拷贝状态快照，释放队列后再并发读取凭据与 `login.ps1`，解除对热路径 `route()` 的阻塞；`prepareLogin` 纳入 `serializedRead()` 并转义 `cli.version` 中的正则特殊字符；`diagnostics.js` `persist()` 改用随机 UUID 临时文件防并发踩踏；国际版 `cli-image-process.js` 补齐非 `StructuredOutput` 原生 `tool_use` 熔断；修复 `inspectCli` 共享去重内层 `catch` 的 `signal.aborted` 穿透及 `readAccountQuota` 换票成功后的重复写盘。
+- **Token 用量页 SVG 仪表盘（零外部依赖）**：新增纯内联 SVG 缓存命中率环形图、按模型堆叠横向 Token 构成柱状图（未命中输入 / 缓存命中 / 输出）、最近 24 次调用趋势柱状图（支持一键切换「按耗时 ms / 按 Token」、按成功/失败/取消着色与悬停明细），以及近期失败原因分布条形图。
+- **账号、模型、日志与全局交互优化**：账号额度面板新增剩余额度分段进度条与资源包使用率条+到期天数徽章；模型列表新增能力快捷筛选胶囊（图片 / 推理 / ≤1×）与上下文相对比例微条、高倍率（≥2×）提醒；日志控制台默认升级为可折叠结构化事件时间线（支持按状态与关键词筛选、切换原始 JSON、一键复制），补齐就绪态「导出详细日志 / 开启失败采集」与 `IssueFeedback` 的 `logTools`；新增未保存草稿吸底保存条、右下角可关闭轻量 Toast、顶部实时并发数徽标、`quotaAction` 序号防竞态以及窗口切后台（`visibilitychange`）暂停轮询。
+
 ## 2.1.22 — 修复子进程退出兜底、账号与换票竞态、国际版默认账号展示一致性及前端边界缺陷
 
 - **子进程与资源清理**：将 `cli-image-process.js` 与 `model-catalog.js` 接入 `trackChild` 退出兜底并补齐 POSIX `detached: true` 进程组隔离；宿主 `exit` 回调改用同步强杀；`inspectCli` 并发去重改为按调用方独立响应 `AbortSignal` 并在安装完成后强制 `fresh: true`；`checkCli` 去重按 `(cliPath, configDir, accountId)` 分键。
