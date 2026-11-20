@@ -38,14 +38,16 @@ test('one UI keeps regional drafts, actions, consent, log exports and diagnostic
  // so it is found by its accessible name instead of by element type.
  const regionGroup=()=>tree.root.findAll(n=>n.props&&n.props.role==='group'&&n.props['aria-label']==='配置区域')[0]
  const switchRegion=async name=>{await act(async()=>regionGroup().findAllByType('button').find(n=>n.children.join('')===name).props.onClick())}
- const cnInput=region('cn').findAllByType('input').find(n=>n.props.list==='dsh-codebuddy-cn-models')
- await act(async()=>cnInput.props.onChange({target:{value:'cn-only-draft'}}))
+ // 2.1.31 replaced the free-text datalist model input with a catalog-backed
+ // <select>: the draft is edited through the select's onChange, same contract.
+ const cnModelSelect=()=>region('cn').findAllByType('select').find(n=>n.props.value!==undefined&&n.children.some(c=>c&&c.props&&typeof c.props.value==='string'&&c.children.join('').startsWith('跟随模型默认值')))
+ await act(async()=>cnModelSelect().props.onChange({target:{value:'cn-only-draft'}}))
  await switchRegion('国际版')
  assert.equal(region('cn').props.hidden,true);assert.equal(region('intl').props.hidden,false)
  assert.equal(button('intl','刷新模型与倍率').props.disabled,false)
  await act(async()=>button('intl','刷新模型与倍率').props.onClick())
  assert.equal(calls.at(-1).region,'intl');assert.equal(forms.cn.getSnapshot().value.model,'')
- await switchRegion('国内版');assert.equal(cnInput.props.value,'cn-only-draft')
+ await switchRegion('国内版');assert.equal(cnModelSelect().props.value,'cn-only-draft')
  await act(async()=>button('cn','保存设置').props.onClick())
  assert.equal(forms.cn.getSnapshot().value.model,'cn-only-draft');assert.equal(forms.intl.getSnapshot().value.model,'')
  await switchRegion('国际版')
@@ -61,7 +63,10 @@ test('one UI keeps regional drafts, actions, consent, log exports and diagnostic
  const text=JSON.stringify(tree.toJSON())
  assert.ok(JSON.stringify(tree.toJSON()).includes('帧 2/4'))
  assert.ok(!text.includes('NaN'))
- assert.equal(region('cn').findAllByType('input').find(n=>n.props.list).props.list==='dsh-codebuddy-cn-models',true)
+ // The catalog-backed model <select> keeps the region draft isolated (2.1.31
+ // replaced the datalist input; the option list comes from the synced catalog).
+ const intlModelSelect=region('intl').findAllByType('select').find(n=>n.children.some(c=>c&&c.props&&typeof c.props.value==='string'&&c.children.join('').startsWith('跟随模型默认值')))
+ assert.equal(intlModelSelect.children.some(c=>c&&c.props&&c.props.value==='same-model'),true)
 })
 
 test('an unready region is hidden from the picker and the panel',async t=>{
