@@ -24,9 +24,18 @@ test('the accounts panel states one status per row and always reaches a terminal
   const source = await readFile(path.join(root, 'lib', 'client.js'), 'utf8')
   // A row whose record exists must not also claim there is no credential.
   assert.equal(source.includes("accountState?.defaultLogin?.present ? null : t('accountNoCredential')"), true)
-  // An unreadable row gets its reason written straight away, so the credit panel can
-  // never sit on "reading" with nothing to act on.
-  assert.equal(source.includes('if (!row.ok) blocked[row.id || \'legacy\']'), true)
+  // An unreadable CLI record must no longer gate the read: the default login is one
+  // machine-wide file that either region can own, so its readability says nothing about
+  // whether credits can be read. Every row is asked and the server answers with a typed
+  // reason, which is what stops the row sitting on "authorise credits" for ever.
+  assert.equal(source.includes('blocked[row.id ||'), false, 'an unreadable record must not block the quota read')
+  assert.equal(source.includes('const pending = rows.filter((row) => !row.pathError'), true)
+  // A stored ticket that dies before its own stamp is exchanged once before the
+  // rejection is counted, so one early 401 does not park the row in "failed".
+  for (const region of ['cn', 'intl']) {
+    const adapter = await readFile(path.join(root, 'lib', region, 'index.js'), 'utf8')
+    assert.equal(adapter.includes('quotaRejected(quota) && stored.refreshToken'), true, `${region}: a rejected stored ticket is exchanged once`)
+  }
 })
 
 test('region readiness can be re-probed after the provider is switched on or off', async () => {
