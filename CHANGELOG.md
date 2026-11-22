@@ -1,5 +1,10 @@
 # 更新记录 / Changelog
 
+## 2.1.34 — 修复「一键签到 / 续期令牌」被 `/actions` 路由白名单拦截返回 400 的问题
+
+- **修复 `/actions` 白名单遗漏**：将 `'checkin'` 与 `'keepalive'` 补入 `lib/cn/index.js` 与 `lib/intl/index.js` 的 `/actions` 入口动作白名单，解决点击「一键签到」或「续期令牌」始终返回 `400 invalid-action` 并在前端显示“操作未完成，请检查网络后重试”的 Bug；同时新增白名单回归单测防复发。
+- **优化前端失败提示与空账号提示**：前端 `runMaintenance` 透出后端具体 `message / error` 而非一律回退网络错误文案，并在无可操作已登录账号时给出明确提示。
+
 ## 2.1.33 — 新增双区每日签到、Token 定时续期与可选明文 CLI 凭据原子写回
 
 - **新增双区每日签到（`lib/shared/checkin-client.js`）**：国内版先查 `checkin-activity-status` 权威状态再领取 `/v2/billing/meter/daily-checkin`；国际版按东八区（UTC+8）检查 `/activity/growth/heatmap` 热力图，未点亮时向 `/v2/report` 单次上报数组形态的 `chat_request_send` 活跃信标（严格带 `userId`、剥离 `knowledgeId/knowledgeName` 且不重试）。

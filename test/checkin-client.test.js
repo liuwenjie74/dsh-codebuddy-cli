@@ -95,3 +95,11 @@ test('runIntlDailyBonus short-circuits when today is already lit', async () => {
   assert.equal(res.already, true)
   assert.equal(reportCalled, false)
 })
+
+test('both CN and INTL /actions route whitelists accept checkin and keepalive', async () => {
+  const { readFile } = await import('node:fs/promises')
+  for (const region of ['cn', 'intl']) {
+    const src = await readFile(new URL(`../lib/${region}/index.js`, import.meta.url), 'utf8')
+    assert.ok(src.includes("'preflight', 'checkin', 'keepalive', ...QUOTA_ACTIONS"), `${region} /actions whitelist must include checkin and keepalive`)
+  }
+})

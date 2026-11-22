@@ -65,5 +65,6 @@
   "fix_CLI_REFRESH_INVALID": "CLI 凭据续期参数无效，请更新插件或重试。",
   "fix_CLI_CREDENTIAL_NOT_REFRESHABLE": "未找到当前区域的明文 CLI 凭据（桌面端加密凭据或跨区凭据会自动跳过）。请使用官方 CLI 重新登录或改用设备授权。",
   "fix_CLI_CREDENTIAL_UNSAFE": "检测到凭据文件大小异常或为符号链接，已拒绝写入以保护账号安全。",
-  "fix_CLI_CREDENTIAL_WRITE_FAILED": "写回 CLI 凭据文件失败，请确认该目录具备写入权限且未被其他进程锁定。"
+  "fix_CLI_CREDENTIAL_WRITE_FAILED": "写回 CLI 凭据文件失败，请确认该目录具备写入权限且未被其他进程锁定。",
+  "fix_CHECKIN_NO_TOKEN": "当前没有可用的已登录账号凭据，请先登录账号或完成设备授权后再签到。"
 }
