@@ -59,5 +59,11 @@
   "fix_QUOTA_NOT_AUTHORIZED": "尚未授权读取额度。请点击「授权读取额度」完成一次浏览器授权，或直接去官网查看。",
   "fix_QUOTA_REFRESH_REJECTED": "授权已失效，本地保存的凭据已自动清除。请重新授权。",
   "fix_QUOTA_REFRESH_FAILED": "刷新凭据失败。请重试；持续失败请重新发起授权。",
-  "fix_QUOTA_ACTION_UNKNOWN": "插件不支持该额度操作。请更新插件到最新版后重试。"
+  "fix_QUOTA_ACTION_UNKNOWN": "插件不支持该额度操作。请更新插件到最新版后重试。",
+  "fix_MAINTENANCE_UNAVAILABLE": "账号维护模块尚未就绪，请稍后重试或重新加载插件。",
+  "fix_KEEPALIVE_NO_SOURCE": "未找到可续期的设备授权凭据；如需续期官方 CLI 明文凭据，请先在「功能开关」中开启「允许续期并写回明文 CLI 凭据」。",
+  "fix_CLI_REFRESH_INVALID": "CLI 凭据续期参数无效，请更新插件或重试。",
+  "fix_CLI_CREDENTIAL_NOT_REFRESHABLE": "未找到当前区域的明文 CLI 凭据（桌面端加密凭据或跨区凭据会自动跳过）。请使用官方 CLI 重新登录或改用设备授权。",
+  "fix_CLI_CREDENTIAL_UNSAFE": "检测到凭据文件大小异常或为符号链接，已拒绝写入以保护账号安全。",
+  "fix_CLI_CREDENTIAL_WRITE_FAILED": "写回 CLI 凭据文件失败，请确认该目录具备写入权限且未被其他进程锁定。"
 }

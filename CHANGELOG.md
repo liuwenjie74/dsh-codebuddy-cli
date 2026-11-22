@@ -1,5 +1,12 @@
 # 更新记录 / Changelog
 
+## 2.1.33 — 新增双区每日签到、Token 定时续期与可选明文 CLI 凭据原子写回
+
+- **新增双区每日签到（`lib/shared/checkin-client.js`）**：国内版先查 `checkin-activity-status` 权威状态再领取 `/v2/billing/meter/daily-checkin`；国际版按东八区（UTC+8）检查 `/activity/growth/heatmap` 热力图，未点亮时向 `/v2/report` 单次上报数组形态的 `chat_request_send` 活跃信标（严格带 `userId`、剥离 `knowledgeId/knowledgeName` 且不重试）。
+- **新增 Token 定时续期与可选明文 CLI `.info` 原子写回**：新增 `lib/shared/account-maintenance.js` 编排器与 `refreshCliCredentialFile`（四重安全门禁：跳过 `.logged-out`、符号链接、桌面端 `$wbEncrypted` 加密文件及跨区凭据；两段式快照防并发覆盖；保持原 `expiresAt` 毫秒/秒单位不变；活跃调用期间自动顺延；`tmp + rename` 原子写回）。
+- **前端账号维护与功能开关**：在【账号管理】→「账号概览」头部新增「一键签到」与「续期令牌」按钮并在各账号行回显最新签到/续期状态；在【连接配置】→「功能开关」新增「每日自动签到」「Token 定时续期」「允许续期并写回明文 CLI 凭据」三项默认关闭的即时生效开关，全部定时器绑定 `ctx.effect` 清理。
+- **新增 10 项专项单元测试**：`test/checkin-client.test.js` 与 `test/cli-credential-refresh.test.js` 全覆盖 UTC+8 日期、热力图双形态、CN 业务码分类、INTL 信标字段校验、`.info` 原子写回与并发快照冲突跳过。
+
 ## 2.1.32 — 默认模型仅列已启用项、优化可执行文件路径单行展示并更新中英文插件说明
 
 - **「默认模型 ID」下拉框仅展示已启用模型**：过滤掉目录中已停用的模型，避免列表冗长（若已保存的模型当前处于停用或目录外自定义状态，仍保留为兼容项不丢失）；同时移除「高级连接与默认值（可选）」标题旁重复的 `可选` 标签。

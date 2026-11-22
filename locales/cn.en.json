@@ -297,5 +297,20 @@
   "usageNote": "Input includes uncached, cache-read and cache-write tokens, counted once. This is not the latest question length or billed credits. Resets on restart.",
   "usageOutput": "Output tokens",
   "usageTotals": "{calls} cumulative requests · {input} total input (including cache) · {read} cache hits · {output} total output tokens",
-  "viewLogs": "View basic logs"
+  "viewLogs": "View basic logs",
+  "autoCheckin": "Daily auto check-in",
+  "autoCheckinToggle": "Run daily check-in (China) or active bonus beacon (International) on UTC+8 schedule",
+  "autoCheckinNote": "Off by default. China checks in at 09:00 / 21:00 UTC+8; International checks the UTC+8 heatmap at 08:00 / 12:00 / 16:00 / 20:00 and sends a single activity beacon when unlit (bonus pack granted next morning). Already-completed accounts are skipped.",
+  "autoTokenKeepalive": "Scheduled token keepalive",
+  "autoTokenKeepaliveToggle": "Refresh stored device-authorisation tokens daily at 22:00 UTC+8",
+  "autoTokenKeepaliveNote": "Off by default. Refreshes only plugin-stored device grants without touching official CLI login files unless the plaintext CLI refresh switch below is explicitly enabled.",
+  "allowCliCredentialRefresh": "Allow plaintext CLI credential refresh",
+  "allowCliCredentialRefreshToggle": "Refresh and atomically write back plaintext CLI .info login files",
+  "allowCliCredentialRefreshNote": "Off by default. Only touches plaintext .info files for the current region (skips encrypted desktop records), avoids active CLI calls, and uses two-phase snapshot verification before atomic write-back.",
+  "checkinAll": "Check in",
+  "checkinBusy": "Checking in…",
+  "checkinDone": "Check-in finished: {msg}",
+  "keepaliveAll": "Refresh token",
+  "keepaliveBusy": "Refreshing…",
+  "keepaliveDone": "Keepalive finished: {msg}"
 }

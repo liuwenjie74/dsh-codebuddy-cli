@@ -59,5 +59,11 @@
   "fix_QUOTA_NOT_AUTHORIZED": "Quota access is not authorised. Press Authorise quota access to confirm once in your browser, or read the quota on the official site.",
   "fix_QUOTA_REFRESH_REJECTED": "The authorisation is no longer valid and the stored credential was removed. Authorise again.",
   "fix_QUOTA_REFRESH_FAILED": "Refreshing the credential failed. Retry; if it keeps failing, authorise again.",
-  "fix_QUOTA_ACTION_UNKNOWN": "This quota action is not supported by the installed plugin. Update the plugin and retry."
+  "fix_QUOTA_ACTION_UNKNOWN": "This quota action is not supported by the installed plugin. Update the plugin and retry.",
+  "fix_MAINTENANCE_UNAVAILABLE": "Account maintenance is not ready yet. Retry shortly or reload the plugin.",
+  "fix_KEEPALIVE_NO_SOURCE": "No refreshable device grant found. To refresh plaintext CLI credentials, enable 'Allow plaintext CLI credential refresh' under Feature switches.",
+  "fix_CLI_REFRESH_INVALID": "Invalid CLI credential refresh parameters. Update the plugin or retry.",
+  "fix_CLI_CREDENTIAL_NOT_REFRESHABLE": "No plaintext CLI credential found for this region (encrypted desktop records and foreign-region records are skipped). Sign in via the official CLI or use device authorisation.",
+  "fix_CLI_CREDENTIAL_UNSAFE": "Refused to write the credential file because it is a symlink or exceeds the safe size limit.",
+  "fix_CLI_CREDENTIAL_WRITE_FAILED": "Could not write back the CLI credential file. Check folder write permissions and ensure no other process is locking it."
 }

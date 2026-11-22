@@ -297,5 +297,20 @@
   "usageNote": "累计输入包含未缓存、缓存命中和缓存写入，每项只计一次；不是单条提问的字数，也不代表积分扣费。重启后清零。",
   "usageOutput": "输出 tokens",
   "usageTotals": "累计请求 {calls} 次 · 累计输入（含缓存）{input} · 缓存命中 {read} · 累计输出 {output} Token",
-  "viewLogs": "查看普通日志"
+  "viewLogs": "查看普通日志",
+  "autoCheckin": "每日自动签到",
+  "autoCheckinToggle": "开启后按东八区窗口自动签到（国内版每日签到 / 国际版活跃信标）",
+  "autoCheckinNote": "默认关闭。国内版在东八区 9:00 / 21:00 检查并领取每日签到；国际版在 8:00 / 12:00 / 16:00 / 20:00 检查热力图并在未点亮时上报单次活跃信标（次日凌晨自动发放奖励积分）。当日已完成会自动跳过。",
+  "autoTokenKeepalive": "Token 定时续期",
+  "autoTokenKeepaliveToggle": "每日东八区 22:00 自动续期已保存的设备授权令牌",
+  "autoTokenKeepaliveNote": "默认关闭。默认仅续期插件自身保存的设备授权令牌，不会改动官方 CLI 的磁盘登录文件；若需同时续期官方 CLI 明文凭据，请显式开启下方开关。",
+  "allowCliCredentialRefresh": "允许续期并写回明文 CLI 凭据",
+  "allowCliCredentialRefreshToggle": "续期时同步刷新并原子写回明文 CLI .info 登录文件",
+  "allowCliCredentialRefreshNote": "默认关闭。开启后仅作用于明文 .info 文件，自动跳过桌面端加密凭据（$wbEncrypted）与跨区文件，且在无活跃 CLI 调用时采用两段式快照校验原子写回，避免与官方 CLI 冲突。",
+  "checkinAll": "一键签到",
+  "checkinBusy": "签到中…",
+  "checkinDone": "签到完成：{msg}",
+  "keepaliveAll": "续期令牌",
+  "keepaliveBusy": "续期中…",
+  "keepaliveDone": "续期完成：{msg}"
 }
