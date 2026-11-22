@@ -103,3 +103,78 @@ test('both CN and INTL /actions route whitelists accept checkin and keepalive', 
     assert.ok(src.includes("'preflight', 'checkin', 'keepalive', ...QUOTA_ACTIONS"), `${region} /actions whitelist must include checkin and keepalive`)
   }
 })
+
+test('account-maintenance reads config.accountHome for isolated multi-accounts (CN & INTL)', async () => {
+  const { mkdtempSync, mkdirSync, writeFileSync, rmSync } = await import('node:fs')
+  const { tmpdir } = await import('node:os')
+  const { join } = await import('node:path')
+  const { createAccountMaintenance } = await import('../lib/shared/account-maintenance.js')
+
+  const root = mkdtempSync(join(tmpdir(), 'dsh-maint-home-'))
+  try {
+    const sub = process.platform === 'win32'
+      ? join('AppData', 'Local', 'CodeBuddyExtension', 'Data', 'Public', 'auth')
+      : join('.local', 'share', 'CodeBuddyExtension', 'Data', 'Public', 'auth')
+    const homeA = join(root, 'acct-a')
+    const homeB = join(root, 'acct-b')
+    mkdirSync(join(homeA, sub), { recursive: true })
+    mkdirSync(join(homeB, sub), { recursive: true })
+    writeFileSync(join(homeA, sub, 'intl.info'), JSON.stringify({
+      account: { uid: 'uid-a', nickname: 'alice@example.com' },
+      auth: { accessToken: 'tok-a', refreshToken: 'ref-a', domain: 'www.codebuddy.ai', expiresAt: Date.now() + 3600_000 }
+    }))
+    writeFileSync(join(homeB, sub, 'intl.info'), JSON.stringify({
+      account: { uid: 'uid-b', nickname: 'bob@example.com' },
+      auth: { accessToken: 'tok-b', refreshToken: 'ref-b', domain: 'www.codebuddy.ai', expiresAt: Date.now() + 3600_000 }
+    }))
+
+    const seenAuth = []
+    const fetchMock = async (url, init) => {
+      seenAuth.push(init?.headers?.Authorization || init?.headers?.authorization || '')
+      if (String(url).includes('/heatmap')) {
+        const now = new Date(Date.now() + 8 * 3600_000)
+        const d = `${now.getUTCFullYear()}-${String(now.getUTCMonth() + 1).padStart(2, '0')}-${String(now.getUTCDate()).padStart(2, '0')}`
+        return jsonRes(200, { code: 0, data: { cells: [{ date: d, score: 1 }] } })
+      }
+      return jsonRes(200, { code: 0, data: { streak: { days: 2 } } })
+    }
+
+    const maint = createAccountMaintenance({
+      region: 'intl',
+      quotaStore: { read: async () => null, write: async () => {} },
+      getAccounts: () => ({
+        snapshot: async () => ({
+          defaultLogin: { present: false, code: 'CLI_CREDENTIAL_MISSING' },
+          accounts: [
+            { id: 'id-a', label: 'Alice', credentialsPresent: true },
+            { id: 'id-b', label: 'Bob', credentialsPresent: true }
+          ]
+        }),
+        configForId: async (base, id) => ({
+          ...base,
+          accountId: id,
+          accountHome: id === 'id-a' ? homeA : homeB
+        })
+      }),
+      getConfig: () => ({}),
+      fetchImpl: fetchMock
+    })
+
+    const resA = await maint.checkinAccount({ accountId: 'id-a', accountHome: homeA }, { force: true })
+    const resB = await maint.checkinAccount({ accountId: 'id-b', accountHome: homeB }, { force: true })
+    assert.equal(resA.ok, true)
+    assert.equal(resB.ok, true)
+    assert.ok(seenAuth.includes('Bearer tok-a'), 'account A should use its own accountHome token')
+    assert.ok(seenAuth.includes('Bearer tok-b'), 'account B should use its own accountHome token')
+  } finally {
+    rmSync(root, { recursive: true, force: true })
+  }
+})
+
+test('client UI keeps only bottom-right toast pop-up and formats named per-account results', async () => {
+  const { readFileSync } = await import('node:fs')
+  const clientSrc = readFileSync(new URL('../lib/client.js', import.meta.url), 'utf8')
+  assert.ok(!clientSrc.includes("notice ? h('div', { role: 'status', 'aria-live': 'polite', style: { padding: '0 4px'"), 'duplicate top inline notice banner must be removed')
+  assert.ok(clientSrc.includes("const accountDisplayName = (key) =>"), 'runMaintenance should resolve per-account display names')
+  assert.ok(clientSrc.includes("setToastDismissed('')"), 'runMaintenance should reset toastDismissed so repeated clicks always pop up')
+})
