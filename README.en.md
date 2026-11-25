@@ -2,9 +2,9 @@
 
 [简体中文](README.md)
 
-**2.1.36 supports DSH >=0.2.1-rc.2 <0.5.0-0 (including 0.2.2-rc.1 / rc.2 / rc.3).**
+**2.1.37 supports DSH >=0.2.1-rc.2 <0.5.0-0 (including 0.2.2-rc.1 / rc.2 / rc.3).**
 
-[Download v2.1.36](https://github.com/liuwenjie74/dsh-codebuddy-cli/releases/download/v2.1.36/dsh-dkn-codebuddy-cli-2.1.36.tgz) · [Changelog](CHANGELOG.md) · [Installation & Migration](docs/MIGRATION.en.md)
+[Download v2.1.37](https://github.com/liuwenjie74/dsh-codebuddy-cli/releases/download/v2.1.37/dsh-dkn-codebuddy-cli-2.1.37.tgz) · [Changelog](CHANGELOG.md) · [Installation & Migration](docs/MIGRATION.en.md)
 
 One package and one unified **CodeBuddy** sidebar settings page containing two isolated official CLI providers: **China (`codebuddy-cli-cn`)** and **International (`codebuddy-cli-intl`)**. DSH retains full conversation and business-tool control while this plugin bridges local official CLI execution and catalog sync.
 
