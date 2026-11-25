@@ -70,7 +70,7 @@ test('one installed package retains two providers, independent requests, cancell
   const records=(await readFile(path.join(dir,'fixture-calls.jsonl'),'utf8')).trim().split('\n').map(JSON.parse)
   assert.ok(records.every(r=>r.region===region))
  }
- assert.equal(routes.size,8)
+ assert.equal(routes.size,10);assert.ok([...routes.keys()].filter(p=>p.endsWith('/usage')).length===2,'both regions must expose /usage')
 })
 
 test('unified CN default ignores an inherited foreign CLI directory without changing the parent',async()=>{

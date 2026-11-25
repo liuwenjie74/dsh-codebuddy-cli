@@ -53,7 +53,7 @@ if (mode === 'invalid') {
 } else if (mode === 'post-result') {
   init(); emit(result()); emit({ type: 'assistant', message: { content: [{ type: 'text', text: 'unexpected after terminal' }] } })
 } else if (mode === 'duplicate-init') {
-  init(); init(); emit(result())
+  init(); init(); emit(result({ text: 'ok', toolCalls: [] }))
 } else if (mode === 'result-before-init') {
   emit(result())
 } else if (mode === 'missing-init') {

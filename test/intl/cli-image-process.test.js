@@ -52,7 +52,6 @@ test('malformed frames, missing terminal results, overflow and permission reques
     ['invalid', 'CLI_STREAM_INVALID', {}, 'json-parse'],
     ['tail', 'CLI_STREAM_INVALID', {}, 'json-parse'],
     ['shape', 'CLI_STREAM_INVALID', {}, 'frame-shape'],
-    ['duplicate-init', 'CLI_STREAM_INVALID', {}, 'duplicate-init'],
     ['result-before-init', 'CLI_STREAM_INVALID', {}, 'result-before-init'],
     ['post-result', 'CLI_STREAM_INVALID', {}, 'post-result-sequence'],
     ['overflow', 'CLI_OUTPUT_TOO_LARGE', { maxStdoutBytes: 1000 }, 'output-too-large'],
@@ -150,4 +149,13 @@ test('cancellation and the request deadline stop the image process without a usa
     && error.processDiagnostics.streamReason === 'deadline'
     && error.processDiagnostics.deadlineReached === true
     && error.processDiagnostics.terminationInitiator === 'deadline')
+})
+
+test('duplicate system/init frames before terminal result are accepted (CLI 2.185.0+ compatibility)', async () => {
+  const output = await run('duplicate-init')
+  assert.equal(output.processDiagnostics.initCount, 2)
+  assert.equal(output.processDiagnostics.resultCount, 1)
+  assert.equal(output.processDiagnostics.streamReason, 'none')
+  const structured = parseStructuredResponse(collectStructuredResult(output.stdout, output).result, [])
+  assert.equal(structured.text, 'ok')
 })
