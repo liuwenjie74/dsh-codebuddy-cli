@@ -1,5 +1,13 @@
 # 更新记录 / Changelog
 
+## 2.2.01 - 2026-11-27
+
+- 修复：国际版 `runProcess`（`lib/intl/cli-process.js`）在 `ABORTED` 及全部错误退出路径补齐 `processDiagnostics`（`channel`、`elapsedMs`、`stdoutBytes`、`stderrBytes`、`terminationInitiator`、`exitCode`、`exitSignal`），并在被取消前已产生 `stderr/stdout` 错误通知时提取 `noticeClass/noticeSource` 写入 `responseDiagnostics`，彻底消除取消/20s 超时场景的诊断盲区。
+- 修复：国际版诊断存储（`lib/intl/diagnostics.js`）放宽 `exitCode` 至 32 位范围（兼容 Windows NTSTATUS 异常退出码），补充 `controlClass: 'cancelled' | 'image-offload'` 标记，将 `ABORTED` 从 `status().failures` 真实失败计数中剥离；同时仅在 `info` 及以上日志级别落盘 `ABORTED`，避免高频取消刷满 100 条诊断环。
+- 优化：双区主通道（`lib/cn/index.js`、`lib/intl/index.js`）在无工具请求（`tools.length === 0`）时将 `--max-turns` 由 `4` 降至 `2`，并在 `spawn` 子进程前增加一次 `signal.aborted` 预检以减少无效进程拉起与强杀抖动；移除 `cliEnv()` 已内置环境变量的冗余覆盖。
+- 修复：补齐国际版 `inspectCli` 的 `assertAccountInvocation` 多账号形态校验、在 `publicStatus()` 中对外暴露 `accountError`、将无 usage 的失败请求同步写入 `usage-store` 保持统计口径一致，并将官方 CLI `2.185.0` 纳入已核查版本列表（`lib/shared/cli-version.js`）。
+- 优化：清理 `lib/shared/cli-credentials.js` 冗余分支，并为 `lib/shared/usage-store.js` 增加目录就绪标记避免每次追加写入重复调用 `mkdir`。
+
 ## 2.1.37 - 2026-11-24
 
 - 优化：将 Token 用量筛选栏的「当前范围」说明收进信息小图标（`i`），顶部筛选栏恢复紧凑单行布局。

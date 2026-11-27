@@ -90,9 +90,10 @@ test('DSH integration discovers all models, forwards selected IDs and efforts, s
   assert.equal(calls[3].args.includes('--effort'), false)
   assert.ok(calls.every((call) => call.args.includes('--system-prompt') && !call.args.includes('--append-system-prompt')))
   for (const call of calls) {
-    assert.deepEqual(JSON.parse(call.args[call.args.indexOf('--json-schema') + 1]), JSON.parse(call.input.slice(call.input.indexOf('{"protocol"'))).responseSchema)
+    const envelope = JSON.parse(call.input.slice(call.input.indexOf('{"protocol"')))
+    assert.deepEqual(JSON.parse(call.args[call.args.indexOf('--json-schema') + 1]), envelope.responseSchema)
     assert.equal(call.args[call.args.indexOf('--tools') + 1], 'StructuredOutput', 'only the output tool is enabled')
-    assert.equal(call.args[call.args.indexOf('--max-turns') + 1], '4')
+    assert.equal(call.args[call.args.indexOf('--max-turns') + 1], envelope.tools.length === 0 ? '2' : '4', 'a request without DSH tools needs only the structured submission turn')
     assert.deepEqual(JSON.parse(call.args[call.args.indexOf('--mcp-config') + 1]), { mcpServers: {} })
     assert.equal(call.args.includes('--dangerously-skip-permissions'), false)
   }

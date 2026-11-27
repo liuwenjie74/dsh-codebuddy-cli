@@ -92,7 +92,10 @@ test('DSH integration discovers all models, forwards selected IDs and efforts, s
   assert.ok(calls.every((call) => call.args.includes('--system-prompt') && !call.args.includes('--append-system-prompt')))
   assert.ok(calls.every((call) => call.args.includes('--json-schema')))
   assert.ok(calls.every((call) => call.args[call.args.indexOf('--tools') + 1] === 'StructuredOutput'))
-  assert.ok(calls.every((call) => call.args[call.args.indexOf('--max-turns') + 1] === '4'))
+  assert.ok(calls.every((call) => {
+    const envelope = JSON.parse(call.input.slice(call.input.indexOf('{"protocol"')))
+    return call.args[call.args.indexOf('--max-turns') + 1] === (envelope.tools.length === 0 ? '2' : '4')
+  }), 'a request without DSH tools needs only the structured submission turn')
   assert.ok(calls.every((call) => JSON.parse(call.args[call.args.indexOf('--mcp-config') + 1]).mcpServers))
   assert.ok(calls.every((call) => JSON.parse(call.input.slice(call.input.indexOf('{"protocol"'))).responseSchema))
   assert.ok(records.filter((record) => record.method).every((record) => ['initialize', 'session/new'].includes(record.method)))

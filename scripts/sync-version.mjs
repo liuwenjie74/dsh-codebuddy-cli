@@ -67,7 +67,7 @@ const docTargets = ['README.md', 'README.en.md', 'docs/安装与迁移.md', 'doc
 //   - 依赖/引擎版本区间（匹配位置前面紧跟 ^ ~ > < = 的那些，如 ^4.0.5、>=22.19.0）。
 // 22.19.0 另有天然保护：候选起点前是数字，lookbehind 不成立。
 const UNRELATED_VERSIONS = new Set([
-  '2.174.0', '2.177.0', // ACCOUNT_CLI_VERSIONS：多账号隔离核查过的官方 CLI 版本
+  '2.174.0', '2.177.0', '2.185.0', // ACCOUNT_CLI_VERSIONS：多账号隔离核查过的官方 CLI 版本
   '0.2.0', '0.2.2', // model-catalog.js 的 ACP clientInfo 版本，不是插件版本
   // shared/quota-client.js 的设备授权 UA：这是冒充的官方客户端版本号，属协议数据；
   // 改掉会让授权与计费请求的指纹偏离官方客户端，可能直接被上游拒绝。
