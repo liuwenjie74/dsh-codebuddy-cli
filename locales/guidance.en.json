@@ -69,5 +69,6 @@
   "fix_CHECKIN_NO_TOKEN": "No signed-in account credential is available. Sign in or authorise an account before checking in.",
   "fix_PROBE_FAILED": "Official endpoint connectivity probe failed. Check your network, proxy port, or routing rules and retry.",
   "fix_PROBE_TIMEOUT": "Official endpoint connectivity probe timed out. For the International channel, switch to another proxy node or enable TUN mode and retry.",
-  "fix_PREFLIGHT_PROXY_URL": "Invalid proxy URL. Enter a full http://, https://, socks5://, or socks5h:// URL (e.g. http://127.0.0.1:7897), or leave it empty to inherit the system environment."
+  "fix_PREFLIGHT_PROXY_URL": "Invalid proxy URL. Enter a full http://, https://, socks5://, or socks5h:// URL (e.g. http://127.0.0.1:7897), or leave it empty to inherit the system environment.",
+  "fix_PREFLIGHT_FIRST_BYTE_TIMEOUT": "First-byte timeout must be 0 (disabled) or an integer between 15000 and 600000 ms."
 }

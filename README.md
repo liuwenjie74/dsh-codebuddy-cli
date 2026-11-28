@@ -2,9 +2,9 @@
 
 [English](README.en.md)
 
-**2.2.3，支持 DSH >=0.2.1-rc.2 <0.5.0-0（含 0.2.2-rc.1 / rc.2 / rc.3）。**
+**2.2.4，支持 DSH >=0.2.1-rc.2 <0.5.0-0（含 0.2.2-rc.1 / rc.2 / rc.3）。**
 
-[下载最新版](https://github.com/liuwenjie74/dsh-codebuddy-cli/releases/download/v2.2.3/dsh-dkn-codebuddy-cli-2.2.3.tgz) · [完整更新记录](CHANGELOG.md) · [安装与迁移](docs/安装与迁移.md)
+[下载最新版](https://github.com/liuwenjie74/dsh-codebuddy-cli/releases/download/v2.2.4/dsh-dkn-codebuddy-cli-2.2.4.tgz) · [完整更新记录](CHANGELOG.md) · [安装与迁移](docs/安装与迁移.md)
 
 一个安装包、一个左侧 **CodeBuddy** 统一配置入口，内置 **国内版（`codebuddy-cli-cn`）** 与 **国际版（`codebuddy-cli-intl`）** 两个完全隔离的官方 CLI 提供方。DSH 继续管理会话与业务工具，本插件仅负责通过本地官方 CLI 调度模型与同步目录。
 

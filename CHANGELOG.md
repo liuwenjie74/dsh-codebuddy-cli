@@ -1,5 +1,11 @@
 # 更新记录 / Changelog
 
+## 2.2.4 - 2026-11-28
+
+- 新增：双区「首包/无响应提前超时（`firstByteTimeoutMs`）」看门狗，同时作用于纯文本（`cli-process.js`）与流式帧通道（`cli-image-process.js`）；默认 `0`（关闭），设置为 `15000–600000` ms 后，若子进程一直 0 字节输出或在 `system/init` 后迟迟无上游模型响应帧，立即终止僵死进程并早报 `CLI_TIMEOUT`，避免死节点干等总超时。
+- 新增：双区可选「纯文本流式帧通道（`textStreamMode`）」实时探活开关（默认关闭以保持既有默认契约），开启后纯文本请求改走 `--output-format stream-json --verbose` 逐帧解析，可实时捕获 `system/init` 阶段、上游错误帧与网络异常，并在诊断日志中记录完整帧状态。
+- 新增：前端【连接配置】配套开关与输入框，以及 `PREFLIGHT_FIRST_BYTE_TIMEOUT` 预检校验与中英文处置指引。
+
 ## 2.2.3 - 2026-11-28
 
 - 优化（方案 A）：精简 DSH 模型 ID 显示，双区 `listModels()` 与 `resolveModel()` 直接返回简洁的裸模型 ID（例如 `codebuddy-cli-intl/deepseek-v4.1-flash`），不再拼接 36 位 `dshcbi-account:<uuid>:` 前缀；同时保留对历史会话旧前缀格式的向后兼容解析，无缝路由至当前选中的账号。
