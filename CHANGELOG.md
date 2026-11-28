@@ -1,5 +1,13 @@
 # 更新记录 / Changelog
 
+## 2.2.02 - 2026-11-28
+
+- 修复：双区响应解析（`lib/cn/cli-response.js`、`lib/intl/cli-response.js`）支持读取 CLI `2.185.0+` 结果帧中的 `errors` 与 `errors_info` 数组，并将 `502 Socket is closed`、`ETIMEDOUT`、`ECONNREFUSED`、`ENOTFOUND` 准确归类为 `CLI_NETWORK_ERROR`。
+- 新增：官方服务连通性一键自检（`lib/shared/net.js` 的 `probeRegionConnectivity`、双区 `/actions` 路由 `probeNetwork` 及【连接配置】→「环境与安装」卡片「测试连通性」按钮），5 秒内即可探测 `www.codebuddy.ai` / `www.codebuddy.cn` 连通状态与耗时，快速定位代理节点黑洞。
+- 修复：`lib/shared/usage-store.js` 在聚合 `failures` 分布与分桶 `errorCalls` 时排除 `controlClass === 'cancelled'` 的取消记录，避免主动取消挤占真实失败分布。
+- 优化：移除 `lib/intl/index.js` 中 `resolveModel()` 相对国内版多出的一次 `accounts.assertReady()` 同步阻塞，切模型与解析模型与国内版对齐。
+- 优化：前端（`lib/client.js`）正式消费后端暴露的 `status.accountError`，在顶部账号状态胶囊标红并在【账号管理】页展示错误码与排查指引。
+
 ## 2.2.01 - 2026-11-27
 
 - 修复：国际版 `runProcess`（`lib/intl/cli-process.js`）在 `ABORTED` 及全部错误退出路径补齐 `processDiagnostics`（`channel`、`elapsedMs`、`stdoutBytes`、`stderrBytes`、`terminationInitiator`、`exitCode`、`exitSignal`），并在被取消前已产生 `stderr/stdout` 错误通知时提取 `noticeClass/noticeSource` 写入 `responseDiagnostics`，彻底消除取消/20s 超时场景的诊断盲区。

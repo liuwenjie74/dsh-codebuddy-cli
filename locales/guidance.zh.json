@@ -66,5 +66,7 @@
   "fix_CLI_CREDENTIAL_NOT_REFRESHABLE": "未找到当前区域的明文 CLI 凭据（桌面端加密凭据或跨区凭据会自动跳过）。请使用官方 CLI 重新登录或改用设备授权。",
   "fix_CLI_CREDENTIAL_UNSAFE": "检测到凭据文件大小异常或为符号链接，已拒绝写入以保护账号安全。",
   "fix_CLI_CREDENTIAL_WRITE_FAILED": "写回 CLI 凭据文件失败，请确认该目录具备写入权限且未被其他进程锁定。",
-  "fix_CHECKIN_NO_TOKEN": "当前没有可用的已登录账号凭据，请先登录账号或完成设备授权后再签到。"
+  "fix_CHECKIN_NO_TOKEN": "当前没有可用的已登录账号凭据，请先登录账号或完成设备授权后再签到。",
+  "fix_PROBE_FAILED": "官方服务连通性探测失败。请检查网络连接、代理端口与分流规则，或切换代理节点后重试。",
+  "fix_PROBE_TIMEOUT": "官方服务连通性探测超时。若为国际版，常见原因为当前代理节点无回包，请切换新加坡/日本/香港节点或开启 TUN 模式后重试。"
 }

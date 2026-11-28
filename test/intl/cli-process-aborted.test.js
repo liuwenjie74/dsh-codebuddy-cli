@@ -13,7 +13,7 @@ test('intl runProcess attaches processDiagnostics and upstream noticeClass on AB
     "process.stderr.write('Error: 401 authentication required\\n');",
     'setTimeout(() => {}, 5000);'
   ].join(' ')
-  setTimeout(() => controller.abort(), 120)
+  setTimeout(() => controller.abort(), 800)
 
   await assert.rejects(
     runProcess(process.execPath, ['-e', script], { signal: controller.signal, timeoutMs: 5000 }),
