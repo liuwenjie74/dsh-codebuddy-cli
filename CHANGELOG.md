@@ -1,5 +1,13 @@
 # 更新记录 / Changelog
 
+## 2.2.3 - 2026-11-28
+
+- 优化（方案 A）：精简 DSH 模型 ID 显示，双区 `listModels()` 与 `resolveModel()` 直接返回简洁的裸模型 ID（例如 `codebuddy-cli-intl/deepseek-v4.1-flash`），不再拼接 36 位 `dshcbi-account:<uuid>:` 前缀；同时保留对历史会话旧前缀格式的向后兼容解析，无缝路由至当前选中的账号。
+- 新增：可选自定义代理地址（`proxyUrl`），支持在【连接配置】→「高级连接与默认值」中按区域单独配置 `http://` / `https://` / `socks5://` 代理（如 `http://127.0.0.1:7897`），仅注入本区 CLI 子进程环境并联动「测试连通性」通过代理实测 TLS 连通。
+- 新增：【日志查看】页增加「隐藏已取消」一键过滤按钮（实时显示取消条数），无需调整全局日志级别即可过滤 `ABORTED` 记录。
+- 新增：独立账号备注重命名（`accounts.rename(id, label)`、双区 `/accounts` 路由 `rename` 动作及账号行内「改备注」编辑）。
+- 优化：为前端 `/usage` 筛选查询与 `/diagnostics` 日志拉取补齐 `AbortController` 请求取消，避免快速切换筛选时并发请求积压；版本号同步回归标准 SemVer 格式 `2.2.3`。
+
 ## 2.2.02 - 2026-11-28
 
 - 修复：双区响应解析（`lib/cn/cli-response.js`、`lib/intl/cli-response.js`）支持读取 CLI `2.185.0+` 结果帧中的 `errors` 与 `errors_info` 数组，并将 `502 Socket is closed`、`ETIMEDOUT`、`ECONNREFUSED`、`ENOTFOUND` 准确归类为 `CLI_NETWORK_ERROR`。

@@ -222,7 +222,8 @@ test('hiding a model filters listModels, keeps one visible model and updates the
   const good = await post({ action: 'preflight', cliPath: executable, configDir: directory, timeoutMs: 180000 })
   assert.equal(good.status, 200)
   assert.equal(good.body.ok, true)
-  assert.deepEqual(good.body.checks.map((check) => check.ok), [true, true, true])
+  // The optional proxyUrl check joins preflight and reports skipped when empty.
+  assert.deepEqual(good.body.checks.map((check) => check.ok), [true, true, true, true])
 
   // Empty cliPath/configDir are skipped, not failed.
   const skipped = await post({ action: 'preflight', cliPath: '', configDir: '', timeoutMs: 180000 })

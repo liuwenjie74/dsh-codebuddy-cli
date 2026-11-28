@@ -93,18 +93,20 @@ test('account API, labelled routing and tool-image continuation keep synthetic p
   }
   await fetch(`${origin}/plugins/dsh-codebuddy-cli-intl/actions`, { method: 'POST', headers: { Origin: origin, 'Content-Type': 'application/json', 'X-DSH-CodeBuddy-Action': '1' }, body: JSON.stringify({ action: 'refreshModels' }) })
   const models = await adapter.listModels('codebuddy-cli-intl')
-  // The account rides on the model id; the display name is the plain model name, so the
-  // DSH picker shows one model list instead of one entry per account.
-  assert.equal(models[0].id, pinnedA); assert.equal(models[0].name.includes('Synthetic'), false)
-  assert.equal((await adapter.resolveModel('codebuddy-cli-intl', pinnedA)).id, pinnedA)
-  await assert.rejects(collect({ model: 'future-alpha', messages: [{ role: 'user', content: 'hello' }] }), e => e.code === 'ACCOUNT_MODEL_REQUIRED')
+  // Plan A: model ids are bare and route to the active account; legacy pinned ids
+  // still resolve for old sessions, and the display name never carries an account label.
+  assert.equal(models[0].id, 'future-alpha'); assert.equal(models[0].name.includes('Synthetic'), false)
+  assert.equal((await adapter.resolveModel('codebuddy-cli-intl', pinnedA)).id, 'future-alpha')
+  const bareChunks = await collect({ model: 'future-alpha', messages: [{ role: 'user', content: 'hello' }] })
+  assert.ok(bareChunks.length > 0)
   const tools = [{ name: 'read_test', parameters: { type: 'object', properties: {} } }]
   const plan = await collect({ model: pinnedA, messages: [{ role: 'user', content: 'tool-round' }], tools })
   const call = plan.find(x => x.type === 'block-end' && x.block.type === 'tool-call').block
   await action({ action: 'select', id: b.id })
   const bModels = await adapter.listModels('codebuddy-cli-intl')
-  // Same model under another account: the display name is identical, only the id differs.
+  // Plan A: the list is the same bare catalog under every account; routing follows the selection.
   assert.equal(bModels[0].name, models[0].name)
+  assert.equal(bModels[0].id, 'future-alpha')
   assert.notEqual(bModels[0].id, pinnedA)
   const final = await collect({ model: pinnedA, messages: [
     { role: 'user', content: 'tool-round' }, { role: 'assistant', content: [call] },
@@ -114,8 +116,8 @@ test('account API, labelled routing and tool-image continuation keep synthetic p
   await assert.rejects(collect({ model: pinnedA, messages: [{ role: 'user', content: 'response-case:auth-required' }] }), e => e.code === 'CLI_AUTH_REQUIRED')
   await collect({ model: bModels[0].id, messages: [{ role: 'user', content: 'hello B' }] })
   const calls = (await readFile(path.join(bin, 'requests.jsonl'), 'utf8')).trim().split('\n').map(JSON.parse).filter(x => x.args)
-  assert.equal(calls.length, 4, 'the failed A request is not retried or rerouted to B')
-  assert.ok(calls[0].accountHome.includes(a.id)); assert.ok(calls[1].accountHome.includes(a.id)); assert.ok(calls[2].accountHome.includes(a.id)); assert.ok(calls[3].accountHome.includes(b.id))
+  assert.equal(calls.length, 5, 'the failed A request is not retried or rerouted to B')
+  assert.ok(calls[0].accountHome.includes(a.id)); assert.ok(calls[1].accountHome.includes(a.id)); assert.ok(calls[2].accountHome.includes(a.id)); assert.ok(calls[3].accountHome.includes(a.id)); assert.ok(calls[4].accountHome.includes(b.id))
   for (const call of calls) {
     assert.equal(call.competingAuth, false)
     assert.equal(call.args[call.args.indexOf('--model') + 1], 'future-alpha')
@@ -127,7 +129,7 @@ test('account API, labelled routing and tool-image continuation keep synthetic p
     assert.equal(call.args[call.args.indexOf('--tools') + 1], 'StructuredOutput')
   }
   state = await (await fetch(`${origin}/plugins/dsh-codebuddy-cli-intl/status`)).json()
-  assert.equal(state.accounts.accounts[0].usage.calls, 4, 'A includes one blocked missing-login request, two successful calls and one 401')
+  assert.equal(state.accounts.accounts[0].usage.calls, 5, 'A includes one blocked missing-login request, three successful calls and one 401')
   assert.equal(state.accounts.accounts[1].usage.calls, 1)
   assert.equal(state.usage.lastCall.accountId, b.id)
   assert.equal((await action({ action: 'remove', id: b.id })).status, 409)

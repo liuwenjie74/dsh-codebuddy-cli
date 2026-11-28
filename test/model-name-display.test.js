@@ -16,7 +16,7 @@ for (const region of ['cn', 'intl']) {
     const source = await readFile(path.join(root, 'lib', region, 'index.js'), 'utf8')
     assert.equal(source.includes('accountLabel}]'), false, 'the display name must not carry the account label')
     assert.equal(source.includes('name: `['), false, 'no bracketed account prefix may be built into a model name')
-    assert.equal(source.includes('accountModelId(config.accountId'), true, 'the account must still ride on the model id')
+    assert.equal(source.includes('accountModelId(config.accountId'), false, 'Plan A: models return concise bare ids without 36-char UUID prefixes')
   })
 }
 
