@@ -14,7 +14,7 @@ registerHooks({resolve(specifier,context,next){
  return next(specifier,context)
 }})
 test('one installed package retains two providers, independent requests, cancellation and diagnostics',async t=>{
- const cn=await import('dsh-dkn-codebuddy-cli'),intl=await import('dsh-dkn-codebuddy-cli/intl')
+ const cn=await import('dsh-codebuddy-cli'),intl=await import('dsh-codebuddy-cli/intl')
  assert.equal(cn.name,'llm-codebuddy-cli-cn');assert.equal(intl.name,'llm-codebuddy-cli-intl')
  const directory=await mkdtemp(path.join(tmpdir(),'dsh-unified-'))
  const stateKey=process.platform==='win32'?'LOCALAPPDATA':process.platform==='darwin'?'HOME':'XDG_STATE_HOME'

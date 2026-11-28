@@ -1,10 +1,18 @@
 # 更新记录 / Changelog
 
-## 2.2.4 - 2026-11-28
+## 2.3.0 - 2026-11-28
 
-- 新增：双区「首包/无响应提前超时（`firstByteTimeoutMs`）」看门狗，同时作用于纯文本（`cli-process.js`）与流式帧通道（`cli-image-process.js`）；默认 `0`（关闭），设置为 `15000–600000` ms 后，若子进程一直 0 字节输出或在 `system/init` 后迟迟无上游模型响应帧，立即终止僵死进程并早报 `CLI_TIMEOUT`，避免死节点干等总超时。
-- 新增：双区可选「纯文本流式帧通道（`textStreamMode`）」实时探活开关（默认关闭以保持既有默认契约），开启后纯文本请求改走 `--output-format stream-json --verbose` 逐帧解析，可实时捕获 `system/init` 阶段、上游错误帧与网络异常，并在诊断日志中记录完整帧状态。
-- 新增：前端【连接配置】配套开关与输入框，以及 `PREFLIGHT_FIRST_BYTE_TIMEOUT` 预检校验与中英文处置指引。
+- 变更（包名与产物命名）：包名与发布 tarball 统一由 `dsh-dkn-codebuddy-cli` 更名为 `dsh-codebuddy-cli`（本次产出 `dsh-codebuddy-cli-2.3.0.tgz`），同步更新 `package.json`、`cordis.patch.yml`、`lib/client.js`、`test/coexist.test.js` 与中英文文档；插件组件 ID（`llm-codebuddy-cli-cn` / `llm-codebuddy-cli-intl`）与提供方 ID 保持不变。
+- 新增（第二档）：双区「首包/无响应提前超时（`firstByteTimeoutMs`）」看门狗（`lib/{cn,intl}/cli-process.js`、`lib/{cn,intl}/cli-image-process.js`）与可选「纯文本流式帧通道（`textStreamMode`）」实时探活开关（`lib/{cn,intl}/index.js`、`lib/client.js`），并在 `preflight` 新增第 5 项 `PREFLIGHT_FIRST_BYTE_TIMEOUT` 校验（同步更新 `locales/guidance.{zh,en}.json` 与 `test/{cn,intl}/model-visibility.test.js`）。
+- 修复：双区 `/actions` 的 `probeNetwork` 入口补齐 `validProxyUrl()` 前置格式校验，非法代理地址立即返回 `PREFLIGHT_PROXY_URL` 而非模糊网络错误。
+- 重构（第三档 Phase 1 后端去重）：将 5 个高重合双区模块下沉至 `lib/shared/` 参数化工厂（`lib/shared/local-http.js`、`lib/shared/model-prefs.js`、`lib/shared/model-response.js`、`lib/shared/model-catalog.js`、`lib/shared/accounts.js`），`lib/{cn,intl}/` 对应文件保留薄转发壳与原导出签名，消除 ~1200 行重复代码。
+- 优化（第三档 Phase 1 前端性能 + 6 项体验打磨，`lib/client.js`）：
+  1. 修复【日志查看】中 `ABORTED` 取消记录的状态圆点与徽章判断顺序 Bug，正确显示灰色圆点与中性「已取消 / CANCELLED」徽章；
+  2. 右下角短提示 Toast 支持 4.5 秒自动消失（多行/长错误提示保留手动关闭）；
+  3. 日志每条记录新增「复制此条」按钮并在 JSON 上方直显对应错误码排查指引；
+  4. 当前正在使用的主账号卡片补齐「改备注」行内编辑，且重命名输入框支持 `Enter` 保存 / `Esc` 取消（保持行内无主按钮不变量）；
+  5. 【连接配置】→「环境与安装」卡片同步展示当前生效的网络/代理状态，并在代理地址下方补充重新生成 `login.ps1` 的提示；
+  6. 未保存草稿时支持 `Ctrl+S` / `Cmd+S` 一键保存，并为 `Chip` 补齐 `React.memo`、为模型筛选与日志过滤补齐 `React.useMemo` 以降低 10 秒轮询重渲染开销。
 
 ## 2.2.3 - 2026-11-28
 

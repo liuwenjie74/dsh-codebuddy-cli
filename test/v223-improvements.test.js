@@ -30,7 +30,7 @@ test('both regions support proxyUrl, rename action, Plan A bare model ids, and c
   for (const reg of ['cn', 'intl']) {
     const idx = await readFile(`lib/${reg}/index.js`, 'utf8')
     const rt = await readFile(`lib/${reg}/cli-runtime.js`, 'utf8')
-    const acc = await readFile(`lib/${reg}/accounts.js`, 'utf8')
+    const acc = await readFile('lib/shared/accounts.js', 'utf8')
     assert.match(idx, /proxyUrl:/u)
     assert.match(idx, /'PREFLIGHT_PROXY_URL'/u)
     assert.match(idx, /'rename'/u)

@@ -33,7 +33,7 @@ test('the state tabs are gone and enabled rows float to the top', () => {
   const block = client.slice(shown, shown + 700)
   assert.ok(block.includes('Number(hiddenModels.has(a.id)) - Number(hiddenModels.has(b.id))'), 'enabled rows sort first')
   assert.ok(block.includes('if (!sortKey) return 0'), 'a clicked column only orders inside those two groups')
-  assert.ok(client.slice(at('const filtered = models.filter'), at('const filtered = models.filter') + 300).includes('includes(search.toLowerCase())'), 'the search box still filters')
+  assert.ok(client.slice(at('const memoModels = React.useMemo'), at('const memoModels = React.useMemo') + 900).includes('toLowerCase().includes(q)'), 'the search box still filters')
 })
 
 test('the batch actions hold one place and arm themselves on selection', () => {
